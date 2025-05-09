@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch_geometric.nn.acts import swish
+#from torch_geometric.nn.acts import swish
 from torch_geometric.nn.inits import glorot_orthogonal
 
 class ST_Net_Exp(nn.Module):
