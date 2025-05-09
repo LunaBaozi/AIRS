@@ -1,0 +1,6 @@
+"","knowninhib_name","knowninhib_smiles","genmol_name","genmol_smiles","simil","cinfony.simil"
+"919","Rho kinase inhibitor IV","Cc1cncc2cccc(S(=O)(=O)N3CCCN(C(=O)CN)C[C@@H]3C)c12","4ztq_65_ligand.sdf","CCNCC(O)C12CCC3(CC3)c3c(C)cccc3CC3SCC3C3C1C32Cl",0.116,0.159574468085106
+"4333","GSK143","Cc1ccc(Nc2nc(N[C@H]3CCOC[C@H]3N)ncc2C(N)=O)cc1","4ztq_92_ligand.sdf","C=C(CO)CC1CC/C=C\CCCC(=O)CC(C(O)CC(C2CCCCC(c3ccc(C)cc3)CC2)C2C3CC32)ONC1",0.115,0.164893617021277
+"3690","GSK2334470","CNc1nc(-c2ccc3c(N)n[nH]c3c2)cc(N2C[C@@H](C(=O)NC3CCCCC3)CC[C@H]2C)n1","4ztq_84_ligand.sdf","CCC(C)OC1(C)C2CCC(C(O)(O)O)C3C/N=C(/NC)NOCN(C(O)C4CC4)CC(C)C(C)(C)C(C3)C21",0.114,0.135514018691589
+"945","VIC 1911","Cc1cc(Nc2nc(CC3(C(=O)O)CCN(C(=O)c4cccc(Cl)c4Cl)CC3)ccc2F)n[nH]1","4ztq_65_ligand.sdf","CCNCC(O)C12CCC3(CC3)c3c(C)cccc3CC3SCC3C3C1C32Cl",0.112,0.219409282700422
+"5579","AT-9283","O=C(NC1=CNN/C1=C1/N=c2ccc(CN3CCOCC3)cc2=N1)NC1CC1","4ztq_175_ligand.sdf","[O]C1([S])CC1CC(CCNC12CC1C2CC1CC1)C1CCCCCCC1",0.112,0.0869565217391304

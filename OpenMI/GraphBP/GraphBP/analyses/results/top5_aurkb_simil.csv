@@ -1,0 +1,6 @@
+"","knowninhib_name","knowninhib_smiles","genmol_name","genmol_smiles","simil","cinfony.simil"
+"2890","VIC 1911","Cc1cc(Nc2nc(CC3(C(=O)O)CCN(C(=O)c4cccc(Cl)c4Cl)CC3)ccc2F)n[nH]1","4af3_132_ligand.sdf","NCCNC1C(Cc2ccccc2CCO)C1CC1(CC(=O)OC2C3C4CC423)CC1",0.14,0.230769230769231
+"2871","MK-5108","O=C(O)C1(Cc2cccc(Nc3nccs3)n2)CCC(Oc2cccc(Cl)c2F)CC1","4af3_132_ligand.sdf","NCCNC1C(Cc2ccccc2CCO)C1CC1(CC(=O)OC2C3C4CC423)CC1",0.127,0.27536231884058
+"4801","Cdk2 inhibitor IV","CCN(CC)C(=O)c1ccc(Nc2nc(OCC3CCCCC3)c3[nH]cnc3n2)cc1","4af3_62_ligand.sdf","C=C(C)COC1C2OC3=C4C(C5C(C)C(=C)C6CC65CC5CCCCCCCN6CC(C)C7C(CC76)NC5)=C2C1C4CC3CC",0.119,0.129166666666667
+"5255","hesperadin","CCS(=O)(=O)Nc1ccc2c(c1)/C(=C(/Nc1ccc(CN3CCCCC3)cc1)c1ccccc1)C(=O)N2","4af3_112_ligand.sdf","CCC1CCCCN(CCNC23CCC2C3)N1",0.117,0.09
+"4291","Cdk2 inhibitor IV","CCN(CC)C(=O)c1ccc(Nc2nc(OCC3CCCCC3)c3[nH]cnc3n2)cc1","4af3_29_ligand.sdf","CCC(CO)COC(CC12CC(C(C)CCCCC(C)=O)CNC1C2CC1CCCC1)NC1([NH])[N]C1C",0.115,0.176767676767677
