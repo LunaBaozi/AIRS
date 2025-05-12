@@ -22,8 +22,9 @@ save_sdf_before_uff = False
 save_sdf = True
 data_root='./data/crossdock2020'
 
-path = './trained_model'
-epoch = 33
+path = './trained_model_reduced_dataset_100_epochs'
+#img_path = './trained_model_reduced_dataset_100_epochs/images'
+epoch = 99
 
 all_mols_dict_path = os.path.join(path, '{}_mols.mol_dict'.format(epoch))
 
@@ -104,6 +105,9 @@ bond_adder = BondAdder()
 
 all_results_dict = {}
 os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/') , exist_ok=True)
+os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/images/') , exist_ok=True)
+os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/sdf/') , exist_ok=True)
+
 
 global_index = 0
 global_index_to_rec_src = {}
@@ -208,7 +212,8 @@ for index in all_mols_dict:
                     except:
                         print("Cannot remove H atoms...")
                     
-                    sdf_file = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/' + str(global_index) + '.sdf')
+                    # sdf_file = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/' + str(global_index) + '.sdf')
+                    sdf_file = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/sdf/' + str(global_index) + '.sdf')
                     rd_mol_to_sdf(rd_mol, sdf_file)
                     print('Saving' + str(sdf_file))
                     global_index_to_rec_src[global_index] = mol_dicts['rec_src']
@@ -216,7 +221,8 @@ for index in all_mols_dict:
                 
                 if save_mol:
                     try:
-                        img_path = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/' + str(global_index) + '.png')
+                        # img_path = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/' + str(global_index) + '.png')
+                        img_path = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '/images/' + str(global_index) + '.png')    
                         img = Draw.MolsToGridImage([rd_mol])
                         img.save(img_path)
                         print('Saving' + str(img_path))
