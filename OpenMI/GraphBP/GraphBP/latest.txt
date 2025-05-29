@@ -1,0 +1,4 @@
+Latest notes to remember stuff:
+
+- Environment used to run scores.py: graphbp_clone_rdkitconda (contains conda version of rdkit)
+- Environment used to train, generate, and validate molecules: graphbp 
