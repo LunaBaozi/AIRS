@@ -2,8 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+epoch = 99
+num_gen = 10000
+
 # Load the data
-df = pd.read_csv("molecule_scores.csv")
+df = pd.read_csv(f"molecule_scores_{epoch}_{num_gen}.csv")
 
 # List of score types and their labels
 score_types = [
@@ -57,7 +60,7 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig('histogram_len_smiles.png')
+fig.savefig(f'histogram_len_smiles_{epoch}_{num_gen}.png')
 
 
 # SA_SCORE
@@ -76,7 +79,7 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig('histogram_SA_score.png')
+fig.savefig(f'histogram_SA_score_{epoch}_{num_gen}.png')
 
 
 
@@ -96,7 +99,7 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig('histogram_SCScore.png')
+fig.savefig(f'histogram_SCScore_{epoch}_{num_gen}.png')
 
 
 
@@ -116,4 +119,4 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig('histogram_NPscore.png')
+fig.savefig(f'histogram_NPscore_{epoch}_{num_gen}.png')
