@@ -9,7 +9,7 @@ import seaborn as sns
 # Paths to input files
 sdf_path = "/vol/data/airs/AIRS/OpenMI/GraphBP/GraphBP/trained_model_reduced_dataset_100_epochs/gen_mols_epoch_99_10000/sdf"
 csv_path = "data/aurora_kinase_B_interactions.csv"
-output_csv = "tanimoto_results.csv"
+output_csv = "tanimoto_results_inter.csv"
 
 # def load_mols_from_sdf(sdf_file):
 #     suppl = Chem.SDMolSupplier(sdf_file)
@@ -97,4 +97,4 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig("tanimoto_heatmap.png")
     plt.close()
-    print("Heatmap saved to tanimoto_heatmap.png")
+    print("Heatmap saved to tanimoto_heatmap_inter.png")
