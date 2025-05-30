@@ -9,7 +9,7 @@ from NP_Score import npscorer
 from syba.syba import SybaClassifier
 
 
-from scscorer_standalone import SCScorer
+from ..scripts import scscorer_standalone as SCScorer
 
 # Initialize SCScorer
 scscorer = SCScorer()
@@ -93,7 +93,7 @@ def calculate_scores_to_csv(folder_path, csv_path):
 # Example usage:
 calculate_scores_to_csv(
     f"../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_{num_gen}/sdf",
-    f"molecule_scores_{epoch}_{num_gen}.csv"
+    f"results/molecule_scores_{epoch}_{num_gen}.csv"
 )
 
 # NOTE: The SA_Score ranges from 1 to 10 with 1 being easy to make and 10 being hard to make.

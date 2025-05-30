@@ -6,7 +6,7 @@ epoch = 99
 num_gen = 10000
 
 # Load the data
-df = pd.read_csv(f"molecule_scores_{epoch}_{num_gen}.csv")
+df = pd.read_csv(f"results/molecule_scores_{epoch}_{num_gen}.csv")
 
 # List of score types and their labels
 score_types = [
@@ -16,31 +16,6 @@ score_types = [
     ("SCScore", "SC Score"),
     ("Syba_score", "Syba Score")
 ]
-
-# plt.style.use('seaborn-v0_8-whitegrid')
-# for score_col, label in score_types:
-#     fig, ax1 = plt.subplots(figsize=(8, 5))
-
-#     # Plot histogram (counts)
-#     counts, bins, patches = ax1.hist(df[score_col].dropna(), bins=20, color='skyblue', alpha=0.7)
-#     ax1.set_xlabel(label)
-#     ax1.set_ylabel('Count of Molecules', color='blue')
-#     ax1.tick_params(axis='y', labelcolor='blue')
-
-#     # # Plot score value as a line (secondary y-axis)
-#     # ax2 = ax1.twinx()
-#     # bin_centers = 0.5 * (bins[1:] + bins[:-1])
-#     # ax2.plot(bin_centers, bin_centers, color='red', linestyle='--', label='Score Value')
-#     # ax2.set_ylabel('Score Value', color='red')
-#     # ax2.tick_params(axis='y', labelcolor='red')
-
-#     plt.title(f'Histogram of {label}')
-#     plt.tight_layout()
-#     plt.show()
-#     # Save the plots to files
-#     fig.savefig(f'histogram_{score_col}.png')
-# # Save the DataFrame to a CSV file
-# df.to_csv("molecule_scores_processed.csv", index=False)
 
 
 
@@ -60,7 +35,7 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig(f'histogram_len_smiles_{epoch}_{num_gen}.png')
+fig.savefig(f'results/histogram_len_smiles_{epoch}_{num_gen}.png')
 
 
 # SA_SCORE
@@ -79,7 +54,7 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig(f'histogram_SA_score_{epoch}_{num_gen}.png')
+fig.savefig(f'results/histogram_SA_score_{epoch}_{num_gen}.png')
 
 
 
@@ -99,7 +74,7 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig(f'histogram_SCScore_{epoch}_{num_gen}.png')
+fig.savefig(f'results/histogram_SCScore_{epoch}_{num_gen}.png')
 
 
 
@@ -119,4 +94,4 @@ ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 plt.tight_layout()
 plt.show()
-fig.savefig(f'histogram_NPscore_{epoch}_{num_gen}.png')
+fig.savefig(f'results/histogram_NPscore_{epoch}_{num_gen}.png')
