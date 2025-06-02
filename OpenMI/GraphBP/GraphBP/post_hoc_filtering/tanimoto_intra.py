@@ -20,16 +20,6 @@ def get_mol_fps_and_smiles(sdf_folder):
                     smiles_list.append(smiles)
     return smiles_list, fps
 
-# def get_fps_from_smiles(smiles_list):
-#     fps = []
-#     for smi in smiles_list:
-#         mol = Chem.MolFromSmiles(smi)
-#         if mol is not None:
-#             fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=2048)
-#             fps.append(fp)
-#     return fps
-
-
 def compute_tanimoto_scores(fps, smiles_list):
     n = len(fps)
     scores = []
@@ -51,7 +41,7 @@ if __name__ == "__main__":
     sdf_folder = "/vol/data/airs/AIRS/OpenMI/GraphBP/GraphBP/trained_model_reduced_dataset_100_epochs/gen_mols_epoch_99_10000/sdf"
     smiles_list, fps = get_mol_fps_and_smiles(sdf_folder)
     scores = compute_tanimoto_scores(fps, smiles_list)
-    csv_path = "tanimoto_results_intra.csv"
+    csv_path = "results/tanimoto_results_intra.csv"
     
     # smiles_list = ["C=C1[C@@H](C)O[C@H]2C[C@H]2N1C",
     #                "C=C1[C@@H](C)O[C@H]2C[C@H]2N1N"]
@@ -78,6 +68,6 @@ if __name__ == "__main__":
     plt.xlabel('Ligand Index')
     plt.ylabel('Ligand Index')
     plt.tight_layout()
-    plt.savefig("tanimoto_heatmap_intra.png", dpi=300)
+    plt.savefig("results/tanimoto_heatmap_intra.png", dpi=300)
     plt.close()
     print("Lower triangular heatmap saved to tanimoto_heatmap_intra.png")
