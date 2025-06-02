@@ -23,10 +23,12 @@ def log_partition_coefficient(smiles):
 def lipinski_trial(sdf_path):
     passed = []
     failed = []
+    smiles = []
     suppl = Chem.SDMolSupplier(sdf_path)
     for mol in suppl:
         if mol is None:
             raise Exception('Not a valid mol')
+        smiles.append(Chem.MolToSmiles(mol))
         num_hdonors = Lipinski.NumHDonors(mol)
         num_hacceptors = Lipinski.NumHAcceptors(mol)
         mol_weight = Descriptors.MolWt(mol)
@@ -47,13 +49,13 @@ def lipinski_trial(sdf_path):
             failed.append('Log partition coefficient over 5, calculated %s' % mol_logp)
         else:
             passed.append('Log partition coefficient: %s' % mol_logp)
-    return passed, failed
+    return passed, failed, smiles
 
 def lipinski_pass(folder_path):
     for filename in os.listdir(folder_path):
         if filename.endswith('.sdf'):
             sdf_path = os.path.join(folder_path, filename)
-    passed, failed = lipinski_trial(sdf_path)
+    passed, failed, smiles = lipinski_trial(sdf_path)
     if failed:
         return False
     else:
@@ -68,20 +70,22 @@ def save_lipinski_results_to_csv(folder_path, csv_path):
         if filename.endswith('.sdf'):
             sdf_path = os.path.join(folder_path, filename)
             try:
-                passed, failed = lipinski_trial(sdf_path)
+                passed, failed, smiles = lipinski_trial(sdf_path)
                 results.append({
                     'filename': filename,
+                    'smiles': '; '.join(smiles),
                     'passed': '; '.join(passed),
                     'failed': '; '.join(failed)
                 })
             except Exception as e:
                 results.append({
                     'filename': filename,
+                    'smiles': smiles,
                     'passed': '',
                     'failed': f'Error: {str(e)}'
                 })
     with open(csv_path, 'w', newline='') as csvfile:
-        fieldnames = ['filename', 'passed', 'failed']
+        fieldnames = ['filename', 'smiles', 'passed', 'failed']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for row in results:
