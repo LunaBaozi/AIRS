@@ -2,3 +2,6 @@ Latest notes to remember stuff:
 
 - Environment used to run scores.py: graphbp_clone_rdkitconda (contains conda version of rdkit)
 - Environment used to train, generate, and validate molecules: graphbp 
+- Generated 10k mols with binding site information, now making analyses
+- Calculated len of smiles, SA_Score, SCScore, NP_score, SYBA score, and intra and inter Tanimoto similarity
+_ Now would like to calculate Lipinksi rules violations
