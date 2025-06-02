@@ -9,10 +9,10 @@ from NP_Score import npscorer
 from syba.syba import SybaClassifier
 
 
-from ..scripts import scscorer_standalone as SCScorer
+from scripts import scscorer_standalone 
 
 # Initialize SCScorer
-scscorer = SCScorer()
+scscorer = scscorer_standalone.SCScorer()
 scscorer.restore()
 
 # Initialize SybaClassifier
