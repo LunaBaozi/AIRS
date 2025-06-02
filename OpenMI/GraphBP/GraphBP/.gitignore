@@ -2,3 +2,8 @@
 *.csv
 *.png
 *.sdf
+*.dict
+*.mol_dict
+*.pkl
+*.json
+*.log
