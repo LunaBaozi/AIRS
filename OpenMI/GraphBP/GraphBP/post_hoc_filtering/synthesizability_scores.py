@@ -20,7 +20,8 @@ syba = SybaClassifier()
 syba.fitDefaultScore()
 
 epoch = 99
-num_gen = 10000
+num_gen = 1000
+known_binding_site = True
 
 def sdf_to_mol(sdf_path, mol_path):
     """
@@ -92,8 +93,8 @@ def calculate_scores_to_csv(folder_path, csv_path):
 
 # Example usage:
 calculate_scores_to_csv(
-    f"../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_{num_gen}/sdf",
-    f"results/molecule_scores_{epoch}_{num_gen}.csv"
+    f"../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf",
+    f"results_bs_{known_binding_site}/molecule_scores_{epoch}_{num_gen}.csv"
 )
 
 # NOTE: The SA_Score ranges from 1 to 10 with 1 being easy to make and 10 being hard to make.

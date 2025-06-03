@@ -25,9 +25,10 @@ data_root='./data/crossdock2020'
 path = './trained_model_reduced_dataset_100_epochs'
 #img_path = './trained_model_reduced_dataset_100_epochs/images'
 epoch = 99
-num_gen = 10000
+num_gen = 1000
+known_binding_site = True
 
-all_mols_dict_path = os.path.join(path, 'epoch_{}_mols_{}.mol_dict'.format(epoch, num_gen))
+all_mols_dict_path = os.path.join(path, 'epoch_{}_mols_{}_bs_{}.mol_dict'.format(epoch, num_gen, known_binding_site))
 
 
 def check_chemical_validity(mol):
@@ -105,9 +106,12 @@ bond_adder = BondAdder()
 
 
 all_results_dict = {}
-os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_' + str(num_gen) + '/') , exist_ok=True)
-os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_' + str(num_gen) + '/images/') , exist_ok=True)
-os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_' + str(num_gen) + '/sdf/') , exist_ok=True)
+os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_mols_' + str(num_gen) + '_bs_' + str(known_binding_site) + '/') , exist_ok=True)
+os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_mols_' + str(num_gen) + '_bs_' + str(known_binding_site) + '/images/') , exist_ok=True)
+os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_mols_' + str(num_gen) + '_bs_' + str(known_binding_site) + '/sdf/') , exist_ok=True)
+
+# os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_' + str(num_gen) + '/images/') , exist_ok=True)
+# os.makedirs(os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_' + str(num_gen) + '/sdf/') , exist_ok=True)
 
 
 global_index = 0
@@ -213,7 +217,7 @@ for index in all_mols_dict:
                     except:
                         print("Cannot remove H atoms...")
                     
-                    sdf_file = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_' + str(num_gen) + '/sdf/' + str(global_index) + '.sdf')
+                    sdf_file = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_mols_' + str(num_gen) + '_bs_' + str(known_binding_site) + '/sdf/' + str(global_index) + '.sdf')
                     rd_mol_to_sdf(rd_mol, sdf_file)
                     print('Saving' + str(sdf_file))
                     global_index_to_rec_src[global_index] = mol_dicts['rec_src']
@@ -221,7 +225,7 @@ for index in all_mols_dict:
                 
                 if save_mol:
                     try:
-                        img_path = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_' + str(num_gen) + '/images/' + str(global_index) + '.png')    
+                        img_path = os.path.join(path, 'gen_mols' + '_epoch_' + str(epoch) + '_mols_' + str(num_gen) + '_bs_' + str(known_binding_site) + '/images/' + str(global_index) + '.png')    
                         img = Draw.MolsToGridImage([rd_mol])
                         img.save(img_path)
                         print('Saving' + str(img_path))

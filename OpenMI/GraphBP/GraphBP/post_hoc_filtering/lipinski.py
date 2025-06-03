@@ -9,7 +9,8 @@ from rdkit.Chem import Lipinski
 from rdkit.Chem import Descriptors
 
 epoch = 99
-num_gen = 10000
+num_gen = 1000
+known_binding_site = True
 
 class SmilesError(Exception): pass
 
@@ -92,5 +93,5 @@ def save_lipinski_results_to_csv(folder_path, csv_path):
             writer.writerow(row)
 
 # Example usage:
-save_lipinski_results_to_csv(f'../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_{num_gen}/sdf', 
-                             f'results/lipinski_pass_{epoch}_{num_gen}.csv')
+save_lipinski_results_to_csv(f'../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf', 
+                             f'results_bs_{known_binding_site}/lipinski_pass_{epoch}_{num_gen}.csv')

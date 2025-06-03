@@ -1,12 +1,18 @@
 import os
 import pandas as pd
 
+epoch = 99
+num_gen = 1000
+known_binding_site = True
+
+
+
 def get_top100_per_metric(results_dir, input_filename):
     input_path = os.path.join(results_dir, input_filename)
     df = pd.read_csv(input_path)
 
     # Load Lipinski violations
-    lipinski_path = os.path.join(results_dir, "lipinski_pass_99_10000.csv")
+    lipinski_path = os.path.join(results_dir, f"lipinski_pass_{epoch}_{num_gen}.csv")
     lipinski_df = pd.read_csv(lipinski_path)
     # Assume molecule id is the second column in both files
     mol_id_col = df.columns[1]
@@ -42,5 +48,5 @@ def get_top100_per_metric(results_dir, input_filename):
         print(f"Saved top 100 for {metric} to {output_filename}")
 
 if __name__ == "__main__":
-    results_folder = os.path.join(os.path.dirname(__file__), "results")
-    get_top100_per_metric(results_folder, "molecule_scores_99_10000.csv")
+    results_folder = os.path.join(os.path.dirname(__file__), f"results_bs_{str(known_binding_site)}")
+    get_top100_per_metric(results_folder, f"molecule_scores_{epoch}_{num_gen}.csv")

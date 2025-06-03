@@ -8,3 +8,6 @@ Latest notes to remember stuff:
 - Made a mess trying to commit large files; used git soft reset to try to fix it, but chose the wrong number
 of commits to reset, so everything crashes. Re-cloning the repo now and copy-pasting the updated files from 
 previous local version on server.
+- How many atoms do the known inhibitors have??
+- Okay I'm too tired to check now, but the whole code needs to be fixed,
+we need to control the variables in a much better way, now it's a mess.

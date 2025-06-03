@@ -107,11 +107,11 @@ class Runner():
                 file_obj.close()
     
 
-
     def generate(self, 
                  num_gen, 
                  temperature=[1.0, 1.0, 1.0, 1.0], 
-                 min_atoms=2, max_atoms=35, 
+                 min_atoms=2, 
+                 max_atoms=35, 
                  focus_th=0.5, 
                  contact_th=0.5, 
                  add_final=False, 
