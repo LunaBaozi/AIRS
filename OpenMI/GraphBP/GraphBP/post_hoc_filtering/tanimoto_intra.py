@@ -5,6 +5,10 @@ from rdkit.Chem import AllChem, DataStructs
 import numpy as np
 import matplotlib.pyplot as plt
 
+epoch = 99
+num_gen = 1000
+known_binding_site = True
+
 def get_mol_fps_and_smiles(sdf_folder):
     fps = []
     smiles_list = []
@@ -38,22 +42,20 @@ def compute_tanimoto_matrix(fps):
     return mat
 
 if __name__ == "__main__":
-    sdf_folder = "/vol/data/airs/AIRS/OpenMI/GraphBP/GraphBP/trained_model_reduced_dataset_100_epochs/gen_mols_epoch_99_10000/sdf"
+    sdf_folder = f"../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{str(known_binding_site)}/sdf/"
     smiles_list, fps = get_mol_fps_and_smiles(sdf_folder)
     scores = compute_tanimoto_scores(fps, smiles_list)
-    csv_path = "results/tanimoto_results_intra.csv"
-    
-    # smiles_list = ["C=C1[C@@H](C)O[C@H]2C[C@H]2N1C",
-    #                "C=C1[C@@H](C)O[C@H]2C[C@H]2N1N"]
-    # fps = get_fps_from_smiles(smiles_list)
-    # scores = compute_tanimoto_scores(fps, smiles_list)
-    # csv_path = "tanimoto_scores_selected.csv"
-    with open(csv_path, "w", newline='') as csvfile:
+    # csv_path = "results/tanimoto_results_intra.csv"
+    results_folder = f"results_bs_{str(known_binding_site)}"
+    os.makedirs(results_folder, exist_ok=True)
+    output_csv = os.path.join(results_folder, "tanimoto_results_intra.csv")
+
+    with open(output_csv, "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["smiles ligand 1", "smiles ligand 2", "tanimoto similarity"])
+        writer.writerow(["mol_1", "mol_2", "tanimoto"])
         for smi1, smi2, score in scores:
             writer.writerow([smi1, smi2, f"{score:.3f}"])
-    print(f"Tanimoto scores saved to {csv_path}")
+    print(f"Tanimoto scores saved to {output_csv}")
 
     
 
@@ -68,6 +70,6 @@ if __name__ == "__main__":
     plt.xlabel('Ligand Index')
     plt.ylabel('Ligand Index')
     plt.tight_layout()
-    plt.savefig("results/tanimoto_heatmap_intra.png", dpi=300)
+    plt.savefig(os.path.join(results_folder, "tanimoto_heatmap_intra.png"))
     plt.close()
     print("Lower triangular heatmap saved to tanimoto_heatmap_intra.png")

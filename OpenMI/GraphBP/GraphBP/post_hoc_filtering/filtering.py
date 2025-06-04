@@ -5,8 +5,6 @@ epoch = 99
 num_gen = 1000
 known_binding_site = True
 
-
-
 def get_top100_per_metric(results_dir, input_filename):
     input_path = os.path.join(results_dir, input_filename)
     df = pd.read_csv(input_path)
@@ -16,7 +14,7 @@ def get_top100_per_metric(results_dir, input_filename):
     lipinski_df = pd.read_csv(lipinski_path)
     # Assume molecule id is the second column in both files
     mol_id_col = df.columns[1]
-    # Assume violations column is named 'violations'
+    # Assume violations column is named 'failed'
     violations_col = 'failed'
     if violations_col not in lipinski_df.columns:
         raise ValueError(f"Column '{violations_col}' not found in Lipinski file.")
@@ -47,6 +45,24 @@ def get_top100_per_metric(results_dir, input_filename):
         top100.to_csv(output_path, columns=cols_to_save, index=False)
         print(f"Saved top 100 for {metric} to {output_filename}")
 
+def get_top_tanimoto_pairs(results_dir, tanimoto_filename, top_n=100, group="inter"):
+    """
+    Save the top N pairs of molecules with the highest Tanimoto similarity.
+    """
+    tanimoto_path = os.path.join(results_dir, tanimoto_filename)
+    df = pd.read_csv(tanimoto_path)
+    # Assume columns: 'mol_1', 'mol_2', 'tanimoto'
+    if not {'mol_1', 'mol_2', 'tanimoto'}.issubset(df.columns):
+        raise ValueError("Tanimoto file must contain 'mol_1', 'mol_2', and 'tanimoto' columns.")
+    top_pairs = df.nlargest(top_n, 'tanimoto').copy()
+    output_filename = f"top{top_n}_tanimoto_pairs_{group}.csv"
+    output_path = os.path.join(results_dir, output_filename)
+    top_pairs.to_csv(output_path, index=False)
+    print(f"Saved top {top_n} Tanimoto pairs to {output_filename}")
+
 if __name__ == "__main__":
     results_folder = os.path.join(os.path.dirname(__file__), f"results_bs_{str(known_binding_site)}")
-    get_top100_per_metric(results_folder, f"molecule_scores_{epoch}_{num_gen}.csv")
+    # get_top100_per_metric(results_folder, f"molecule_scores_{epoch}_{num_gen}.csv")
+    # Add Tanimoto top pairs extraction
+    get_top_tanimoto_pairs(results_folder, "tanimoto_results_inter.csv", top_n=100, group="inter")
+    get_top_tanimoto_pairs(results_folder, "tanimoto_results_intra.csv", top_n=100, group="intra")

@@ -6,10 +6,20 @@ from rdkit.Chem import AllChem, DataStructs
 import numpy as np
 import seaborn as sns
 
+
+epoch = 99
+num_gen = 1000
+known_binding_site = True
+
+
 # Paths to input files
-sdf_path = "/vol/data/airs/AIRS/OpenMI/GraphBP/GraphBP/trained_model_reduced_dataset_100_epochs/gen_mols_epoch_99_10000/sdf"
+sdf_path = f"../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{str(known_binding_site)}/sdf/"
 csv_path = "data/aurora_kinase_B_interactions.csv"
-output_csv = "results/tanimoto_results_inter.csv"
+output_csv = "tanimoto_results_inter.csv"
+results_folder = f"results_bs_{str(known_binding_site)}"
+os.makedirs(results_folder, exist_ok=True)
+
+
 
 
 def load_all_mols_from_sdf_folder(sdf_folder):
@@ -66,14 +76,14 @@ if __name__ == "__main__":
     for i, smiles_sdf_i in enumerate(smiles_sdf):
         for j, mol_csv in enumerate(mols_csv):
             rows.append({
-                "sdf smiles": smiles_sdf_i,
-                "csv smiles": Chem.MolToSmiles(mol_csv),
+                "mol_1": smiles_sdf_i,  # generated molecules
+                "mol_2": Chem.MolToSmiles(mol_csv),  # known inhibitors
                 "tanimoto": sim_matrix[i][j]
             })
 
     # Save to CSV
     df_out = pd.DataFrame(rows)
-    df_out.to_csv(output_csv, index=False)
+    df_out.to_csv(os.path.join(results_folder, output_csv), index=False)
     print(f"Results saved to {output_csv}")
 
     # Plot full similarity heatmap
@@ -85,6 +95,6 @@ if __name__ == "__main__":
     plt.xlabel("CSV molecules")
     plt.ylabel("SDF molecules")
     plt.tight_layout()
-    plt.savefig("results/tanimoto_heatmap_inter.png")
+    plt.savefig(os.path.join(results_folder, "tanimoto_heatmap_inter.png"))
     plt.close()
     print("Heatmap saved to tanimoto_heatmap_inter.png")
