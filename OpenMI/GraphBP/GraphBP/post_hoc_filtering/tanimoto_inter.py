@@ -1,25 +1,21 @@
 import os
 import csv
+import argparse
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem, DataStructs
 import numpy as np
 import seaborn as sns
 
-
-epoch = 99
-num_gen = 1000
-known_binding_site = True
-
-
-# Paths to input files
-sdf_path = f"../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{str(known_binding_site)}/sdf/"
-csv_path = "data/aurora_kinase_B_interactions.csv"
-output_csv = "tanimoto_results_inter.csv"
-results_folder = f"results_bs_{str(known_binding_site)}"
-os.makedirs(results_folder, exist_ok=True)
-
-
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v == 'True':
+        return True
+    elif v == 'False':
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def load_all_mols_from_sdf_folder(sdf_folder):
@@ -35,6 +31,7 @@ def load_all_mols_from_sdf_folder(sdf_folder):
                     smiles = Chem.MolToSmiles(mol)
                     fps.append(fp)
                     smiles_list.append(smiles)
+                    # break
     return smiles_list, fps
 
 def read_aurora_kinase_b_interactions(filepath, smiles_col='smiles'):
@@ -60,10 +57,28 @@ def tanimoto_similarity_matrix(fps1, fps2):
     return sim_matrix
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
+
+    parser = argparse.ArgumentParser(description="Calculate Tanimoto similarity between generated and known molecules.")
+    parser.add_argument('--epoch', type=int, required=True, help='Epoch number')
+    parser.add_argument('--num_gen', type=int, required=True, help='Number of molecules generated')
+    parser.add_argument('--known_binding_site', type=str2bool, required=True, help='Known binding site (True/False)')
+    args = parser.parse_args()
+
+    epoch = args.epoch
+    num_gen = args.num_gen
+    known_binding_site = args.known_binding_site
+
+    # Paths to input files
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf")
+    results_folder = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}")
+    csv_path = os.path.join(script_dir, f"data/aurora_kinase_B_interactions.csv")
+    output_csv = "tanimoto_results_inter.csv"
 
     # Load all molecules from all SDF files in the directory
-    smiles_sdf, fps_sdf = load_all_mols_from_sdf_folder(sdf_path)
+    smiles_sdf, fps_sdf = load_all_mols_from_sdf_folder(sdf_folder)
     if not fps_sdf:
         raise FileNotFoundError("No molecules found in any SDF file in the specified directory.")
 
@@ -87,14 +102,14 @@ if __name__ == "__main__":
     print(f"Results saved to {output_csv}")
 
     # Plot full similarity heatmap
-    sim_arr = np.array(sim_matrix)
+    # sim_arr = np.array(sim_matrix)
 
-    plt.figure(figsize=(12, 10))
-    sns.heatmap(sim_arr, cmap="viridis", cbar_kws={"label": "Tanimoto similarity"})
-    plt.title("Tanimoto Similarity Heatmap")
-    plt.xlabel("CSV molecules")
-    plt.ylabel("SDF molecules")
-    plt.tight_layout()
-    plt.savefig(os.path.join(results_folder, "tanimoto_heatmap_inter.png"))
-    plt.close()
-    print("Heatmap saved to tanimoto_heatmap_inter.png")
+    # plt.figure(figsize=(12, 10))
+    # sns.heatmap(sim_arr, cmap="viridis", cbar_kws={"label": "Tanimoto similarity"})
+    # plt.title("Tanimoto Similarity Heatmap")
+    # plt.xlabel("CSV molecules")
+    # plt.ylabel("SDF molecules")
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(results_folder, "tanimoto_heatmap_inter.png"))
+    # plt.close()
+    # print("Heatmap saved to tanimoto_heatmap_inter.png")

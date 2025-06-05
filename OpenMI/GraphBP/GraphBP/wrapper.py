@@ -24,10 +24,10 @@ def main():
     post_hoc_dir = os.path.join(base_dir, 'post_hoc_filtering')
     scripts = [
         os.path.join(post_hoc_dir, 'synthesizability_scores.py'),
-    #     os.path.join(post_hoc_dir, 'tanimoto_inter.py'),
-    #     os.path.join(post_hoc_dir, 'tanimoto_intra.py'),
-    #     os.path.join(post_hoc_dir, 'lipinski.py'),
-    #     os.path.join(post_hoc_dir, 'filtering.py'),
+        os.path.join(post_hoc_dir, 'tanimoto_inter.py'),
+        os.path.join(post_hoc_dir, 'tanimoto_intra.py'),
+        os.path.join(post_hoc_dir, 'lipinski.py'),
+        os.path.join(post_hoc_dir, 'filtering.py'),
     #     os.path.join(post_hoc_dir, 'post_processed_graphics.py'),
     ]
 
@@ -44,16 +44,16 @@ def main():
     # Run main_eval.py
     run_script(main_eval_path, param_args)
 
-    # results_dir = os.path.join(
-    #     base_dir,
-    #     "post_hoc_filtering",
-    #     f"results_epoch_{args.epoch}_mols_{args.num_gen}_bs_{args.known_binding_site}"
-    # )
-    # os.makedirs(results_dir, exist_ok=True)
+    results_dir = os.path.join(
+        base_dir,
+        "post_hoc_filtering",
+        f"results_epoch_{args.epoch}_mols_{args.num_gen}_bs_{args.known_binding_site}"
+    )
+    os.makedirs(results_dir, exist_ok=True)
     
-    # # Run post-hoc filtering scripts (no extra args)
-    # for script in scripts:
-    #     run_script(script, param_args)
+    # Run post-hoc filtering scripts (no extra args)
+    for script in scripts:
+        run_script(script, param_args)
 
 if __name__ == '__main__':
     main()

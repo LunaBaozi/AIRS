@@ -2,15 +2,23 @@
 
 import os
 import csv
+import argparse
 
 from rdkit import Chem
 from rdkit.Chem import Crippen
 from rdkit.Chem import Lipinski
 from rdkit.Chem import Descriptors
 
-epoch = 99
-num_gen = 1000
-known_binding_site = True
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v == 'True':
+        return True
+    elif v == 'False':
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 
 class SmilesError(Exception): pass
 
@@ -92,6 +100,23 @@ def save_lipinski_results_to_csv(folder_path, csv_path):
         for row in results:
             writer.writerow(row)
 
-# Example usage:
-save_lipinski_results_to_csv(f'../trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf', 
-                             f'results_bs_{known_binding_site}/lipinski_pass_{epoch}_{num_gen}.csv')
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run Lipinski trial on generated molecules.")
+    parser.add_argument('--epoch', type=int, required=True, help='Epoch number')
+    parser.add_argument('--num_gen', type=int, required=True, help='Number of molecules generated')
+    parser.add_argument('--known_binding_site', type=str2bool, required=True, help='Known binding site (True/False)')
+    args = parser.parse_args()
+
+    epoch = args.epoch
+    num_gen = args.num_gen
+    known_binding_site = args.known_binding_site
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf")
+    results_folder = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}")
+    output_csv = os.path.join(results_folder, f"lipinski_pass_{epoch}_mols_{num_gen}_bs_{known_binding_site}.csv")
+
+    save_lipinski_results_to_csv(sdf_folder, output_csv)
+    print(f"Lipinski results saved to {output_csv}")

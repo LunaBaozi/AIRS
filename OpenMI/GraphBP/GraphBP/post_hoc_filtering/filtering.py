@@ -1,9 +1,16 @@
 import os
+import argparse
 import pandas as pd
 
-epoch = 99
-num_gen = 1000
-known_binding_site = True
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v == 'True':
+        return True
+    elif v == 'False':
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def get_top100_per_metric(results_dir, input_filename):
     input_path = os.path.join(results_dir, input_filename)
@@ -61,8 +68,20 @@ def get_top_tanimoto_pairs(results_dir, tanimoto_filename, top_n=100, group="int
     print(f"Saved top {top_n} Tanimoto pairs to {output_filename}")
 
 if __name__ == "__main__":
-    results_folder = os.path.join(os.path.dirname(__file__), f"results_bs_{str(known_binding_site)}")
-    # get_top100_per_metric(results_folder, f"molecule_scores_{epoch}_{num_gen}.csv")
-    # Add Tanimoto top pairs extraction
+    parser = argparse.ArgumentParser(description="Filter and rank molecules based on metrics and Tanimoto similarity.")
+    parser.add_argument('--epoch', type=int, required=True, help='Epoch number')
+    parser.add_argument('--num_gen', type=int, required=True, help='Number of molecules generated')
+    parser.add_argument('--known_binding_site', type=str2bool, required=True, help='Known binding site (True/False)')
+    args = parser.parse_args()
+
+    epoch = args.epoch
+    num_gen = args.num_gen
+    known_binding_site = args.known_binding_site
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    results_folder = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}")
+    
+    # Uncomment if you want to run top100 per metric as well:
+    get_top100_per_metric(results_folder, f"molecule_scores_{epoch}_{num_gen}.csv")
     get_top_tanimoto_pairs(results_folder, "tanimoto_results_inter.csv", top_n=100, group="inter")
     get_top_tanimoto_pairs(results_folder, "tanimoto_results_intra.csv", top_n=100, group="intra")
