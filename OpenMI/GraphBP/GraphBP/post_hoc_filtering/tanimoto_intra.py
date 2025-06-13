@@ -2,7 +2,7 @@ import os
 import argparse
 # import csv
 from rdkit import Chem
-from rdkit.Chem import AllChem, DataStructs
+from rdkit.Chem import DataStructs, rdFingerprintGenerator
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -29,7 +29,8 @@ def get_mol_fps_and_smiles(sdf_folder):
             suppl = Chem.SDMolSupplier(sdf_path)
             for mol in suppl:
                 if mol is not None:
-                    fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=2048)
+                    generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+                    fp = generator.GetFingerprint(mol)
                     smiles = Chem.MolToSmiles(mol)
                     fps.append(fp)
                     smiles_list.append(smiles)

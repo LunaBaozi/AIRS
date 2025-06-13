@@ -18,6 +18,7 @@ def read_aurora_kinase_b_interactions(filepath, smiles_col='smiles'):
     for smi in df[smiles_col]:
         mol = Chem.MolFromSmiles(smi)
         if mol is not None:
+            mol = Chem.AddHs(mol)
             atom_counts.append(mol.GetNumAtoms())
 
     if atom_counts:

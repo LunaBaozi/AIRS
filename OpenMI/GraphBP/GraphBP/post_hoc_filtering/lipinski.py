@@ -116,7 +116,7 @@ if __name__ == "__main__":
     parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
     sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf")
     results_folder = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}")
-    output_csv = os.path.join(results_folder, f"lipinski_pass_{epoch}_mols_{num_gen}_bs_{known_binding_site}.csv")
+    output_csv = os.path.join(results_folder, f"lipinski_pass_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}.csv")
 
     save_lipinski_results_to_csv(sdf_folder, output_csv)
     print(f"Lipinski results saved to {output_csv}")

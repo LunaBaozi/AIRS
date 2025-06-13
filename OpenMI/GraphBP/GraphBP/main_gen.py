@@ -42,8 +42,9 @@ def main():
     torsion_temp = 1.0
 
     # min and max atoms calculated on the basis of known aurkb inhibitors
-    min_atoms = 20 #10
-    max_atoms = 47 #45
+    # The numbers exclude H atoms
+    min_atoms = 20
+    max_atoms = 100
     focus_th = 0.5
     contact_th = 0.5
 

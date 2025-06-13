@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import sys
 import os
+import time
 
 def run_script(script_path, args=None):
     cmd = [sys.executable, script_path]
@@ -38,8 +39,10 @@ def main():
         '--known_binding_site', str(args.known_binding_site)
     ]
 
-    # Run main_gen.py
+    # Run main_gen.py and measure execution time
+    start_time = time.time()
     run_script(main_gen_path, param_args)
+    elapsed_time = time.time() - start_time
 
     # Run main_eval.py
     run_script(main_eval_path, param_args)
@@ -54,6 +57,10 @@ def main():
     # Run post-hoc filtering scripts (no extra args)
     for script in scripts:
         run_script(script, param_args)
+
+    end_time = time.time() - start_time
+    print(f"main_gen.py executed in {elapsed_time:.2f} seconds")
+    print(f"Whole pipeline executed in {end_time:.2f} seconds")
 
 if __name__ == '__main__':
     main()

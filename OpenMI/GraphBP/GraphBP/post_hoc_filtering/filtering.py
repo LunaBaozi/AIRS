@@ -16,18 +16,20 @@ def get_top100_per_metric(results_dir, input_filename):
     input_path = os.path.join(results_dir, input_filename)
     df = pd.read_csv(input_path)
 
+    # "filename" is now the first column, "smiles" is the second
+    filename_col = "filename"
+    mol_id_col = "smiles"
+
     # Load Lipinski violations
-    lipinski_path = os.path.join(results_dir, f"lipinski_pass_{epoch}_{num_gen}.csv")
+    lipinski_path = os.path.join(results_dir, f"lipinski_pass_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}.csv")
     lipinski_df = pd.read_csv(lipinski_path)
-    # Assume molecule id is the second column in both files
-    mol_id_col = df.columns[1]
-    # Assume violations column is named 'failed'
+    # Assume molecule id is the "smiles" column in both files
     violations_col = 'failed'
     if violations_col not in lipinski_df.columns:
         raise ValueError(f"Column '{violations_col}' not found in Lipinski file.")
 
-    # Compute rankings for all metrics
-    metric_columns = df.columns[2:]
+    # Compute rankings for all metrics (skip first two columns: filename, smiles)
+    metric_columns = df.columns[3:]
     rankings = {}
     for metric in metric_columns:
         rankings[metric] = df[metric].rank(method='min', ascending=True).astype(int)
@@ -48,7 +50,8 @@ def get_top100_per_metric(results_dir, input_filename):
 
         output_filename = f"top100_synthesizable_{metric}.csv"
         output_path = os.path.join(results_dir, output_filename)
-        cols_to_save = [mol_id_col, metric] + [f"rank_in_{m}" for m in metric_columns] + [violations_col]
+        # Output columns: filename, smiles, metric, all ranks, violations
+        cols_to_save = [filename_col, mol_id_col, metric] + [f"rank_in_{m}" for m in metric_columns] + [violations_col]
         top100.to_csv(output_path, columns=cols_to_save, index=False)
         print(f"Saved top 100 for {metric} to {output_filename}")
 

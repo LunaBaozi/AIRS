@@ -102,6 +102,7 @@ def calculate_scores_to_csv(folder_path, csv_path):
                     (smi, sc_score) = scscorer.get_score_from_smi(smi)
                     syba_score = syba.predict(smi)
                     data.append({
+                        'filename': filename,
                         'index': idx,
                         'smiles': smi,
                         'len_smiles': len(smi),
@@ -113,6 +114,9 @@ def calculate_scores_to_csv(folder_path, csv_path):
                     idx += 1
                 break  # Only process the first molecule in each file
     df = pd.DataFrame(data)
+    # Reorder columns to have 'filename' as the first column
+    cols = ['filename'] + [col for col in df.columns if col != 'filename']
+    df = df[cols]
     # Ensure the output directory exists
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     df.to_csv(csv_path, index=False)
