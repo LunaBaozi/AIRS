@@ -46,12 +46,13 @@ def read_aurora_kinase_b_interactions(filepath, smiles_col='smiles'):
             cleaned_row = {k: v.strip() if isinstance(v, str) else v for k, v in row.items()}
             data.append(cleaned_row)
     df = pd.DataFrame(data)
+    smiles = df['smiles']
     mols = [Chem.MolFromSmiles(sm) for sm in df[smiles_col] if Chem.MolFromSmiles(sm) is not None]
     generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
     fp = [generator.GetFingerprint(mol) for mol in mols]
     # fps.append(fp)
     # smiles = [sm for sm in df[smiles_col] if Chem.MolFromSmiles(sm) is not None]
-    return mols, fp  #, smiles
+    return mols, fp, smiles
 
 def tanimoto_similarity_matrix(fps1, fps2):
     sim_matrix = []
@@ -86,17 +87,17 @@ if __name__ == "__main__":
     if not fps_sdf:
         raise FileNotFoundError("No molecules found in any SDF file in the specified directory.")
 
-    mols_csv, fps_csv = read_aurora_kinase_b_interactions(csv_path)
+    mols_csv, fps_csv, smiles = read_aurora_kinase_b_interactions(csv_path)
 
     sim_matrix = tanimoto_similarity_matrix(fps_sdf, fps_csv)
     # Prepare data for CSV
     rows = []
     for i, smiles_sdf_i in enumerate(smiles_sdf):
-        for j, mol_csv in enumerate(mols_csv):
+        for j, smile in enumerate(smiles):
             rows.append({
                 "filename": filenames[i],  # add filename column
-                "mol_1": smiles_sdf_i,  # generated molecules
-                "mol_2": Chem.MolToSmiles(mol_csv),  # known inhibitors
+                "smiles": smiles_sdf_i,  # generated molecules
+                "mol_2": smile, #Chem.MolToSmiles(mol_csv),  # known inhibitors
                 "tanimoto": sim_matrix[i][j]
             })
 

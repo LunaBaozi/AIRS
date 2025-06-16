@@ -84,6 +84,7 @@ def get_top_tanimoto_pairs(results_dir, tanimoto_filename, top_n=100, group="int
     Save the top N pairs of molecules with the highest Tanimoto similarity.
     """
     tanimoto_path = os.path.join(results_dir, tanimoto_filename)
+    print(tanimoto_path)
     df = pd.read_csv(tanimoto_path)
     # Columns: 'filename', 'mol_1', 'mol_2', 'tanimoto'
     required_cols = {'filename', 'mol_1', 'mol_2', 'tanimoto'}
@@ -95,6 +96,77 @@ def get_top_tanimoto_pairs(results_dir, tanimoto_filename, top_n=100, group="int
     # Save all columns, including 'filename'
     top_pairs.to_csv(output_path, index=False)
     print(f"Saved top {top_n} Tanimoto pairs to {output_filename}")
+
+
+def combine_all_metrics(
+    results_dir,
+    scores_filename,
+    lipinski_filename,
+    tanimoto_filename,
+    output_filename="all_metrics_combined.csv"
+):
+    # Load scores
+    scores_path = os.path.join(results_dir, scores_filename)
+    scores_df = pd.read_csv(scores_path)
+    # Add index column if not present
+    if "index" not in scores_df.columns:
+        scores_df = scores_df.reset_index().rename(columns={"index": "index"})
+    # Add len_smiles if not present
+    if "len_smiles" not in scores_df.columns:
+        scores_df["len_smiles"] = scores_df["smiles"].apply(len)
+
+    # Load Lipinski
+    lipinski_path = os.path.join(results_dir, lipinski_filename)
+    lipinski_df = pd.read_csv(lipinski_path)
+    # Merge Lipinski pass/fail (columns: 'passed', 'failed')
+    merged_df = scores_df.merge(
+        lipinski_df[["smiles", "passed", "failed"]],
+        on="smiles",
+        how="left"
+    )
+
+    # Load Tanimoto
+    tanimoto_path = os.path.join(results_dir, tanimoto_filename)
+    if not os.path.exists(tanimoto_path):
+        raise FileNotFoundError(f"Tanimoto file {tanimoto_path} not found.")
+    tanimoto_df = pd.read_csv(tanimoto_path)
+    # For each molecule, get the highest Tanimoto similarity and corresponding mol_2
+    tanimoto_best = tanimoto_df.sort_values("tanimoto", ascending=False).groupby("mol_1").first().reset_index()
+    # Rename for clarity
+    tanimoto_best = tanimoto_best.rename(columns={
+        "mol_1": "smiles",
+        "mol_2": "mol_2",
+        "tanimoto": "tanimoto"
+    })
+    # Merge with main df
+    merged_df = merged_df.merge(
+        tanimoto_best[["smiles", "mol_2", "tanimoto"]],
+        on="smiles",
+        how="left"
+    )
+
+    # Order by decreasing Tanimoto similarity
+    merged_df = merged_df.sort_values("tanimoto", ascending=False)
+
+    # Select and order columns
+    columns = [
+        "filename",
+        "index",
+        "smiles",
+        "len_smiles",
+        "SA_score",
+        "NP_score",
+        "SCScore",
+        "Syba_score",
+        "passed",
+        "failed",
+        "mol_2",
+        "tanimoto"
+    ]
+    merged_df.to_csv(os.path.join(results_dir, output_filename), columns=columns, index=False)
+    print(f"Combined metrics saved to {output_filename}")
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Filter and rank molecules based on metrics and Tanimoto similarity.")
@@ -113,4 +185,10 @@ if __name__ == "__main__":
     # Uncomment if you want to run top100 per metric as well:
     get_top100_per_metric(results_folder, f"molecule_scores_{epoch}_{num_gen}.csv")
     get_top_tanimoto_pairs(results_folder, "tanimoto_results_inter.csv", top_n=100, group="inter")
-    get_top_tanimoto_pairs(results_folder, "tanimoto_results_intra.csv", top_n=100, group="intra")
+    # get_top_tanimoto_pairs(results_folder, "tanimoto_results_intra.csv", top_n=100, group="intra")
+    combine_all_metrics(
+    results_dir=results_folder,
+    scores_filename=f"molecule_scores_{epoch}_{num_gen}.csv",
+    lipinski_filename=f"lipinski_pass_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}.csv",
+    tanimoto_filename=f"tanimoto_results_inter.csv",
+    output_filename="all_metrics_combined.csv")
