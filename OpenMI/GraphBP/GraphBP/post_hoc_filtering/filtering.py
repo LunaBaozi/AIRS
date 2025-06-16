@@ -55,18 +55,44 @@ def get_top100_per_metric(results_dir, input_filename):
         top100.to_csv(output_path, columns=cols_to_save, index=False)
         print(f"Saved top 100 for {metric} to {output_filename}")
 
+    # --- New code: Save top 100 Tanimoto pairs with scores for mol_1 ---
+    tanimoto_path = os.path.join(results_dir, "tanimoto_results_inter.csv")
+    if os.path.exists(tanimoto_path):
+        tanimoto_df = pd.read_csv(tanimoto_path)
+        # Get top 100 pairs by tanimoto
+        top100_pairs = tanimoto_df.nlargest(100, "tanimoto").copy()
+        # Merge scores for mol_1 from df (input_filename)
+        # Assume mol_1 column contains the smiles string
+        scores_cols = [col for col in df.columns if col not in [filename_col, mol_id_col]]
+        top100_pairs = top100_pairs.merge(
+            df[[mol_id_col] + list(scores_cols)],
+            left_on="mol_1",
+            right_on=mol_id_col,
+            how="left",
+            suffixes=('', '_mol1')
+        )
+        # Save to CSV
+        output_tanimoto_filename = "top100_tanimoto_pairs_with_scores.csv"
+        output_tanimoto_path = os.path.join(results_dir, output_tanimoto_filename)
+        top100_pairs.to_csv(output_tanimoto_path, index=False)
+        print(f"Saved top 100 Tanimoto pairs with mol_1 scores to {output_tanimoto_filename}")
+    else:
+        print(f"Tanimoto file {tanimoto_path} not found, skipping top100 Tanimoto pairs output.")
+
 def get_top_tanimoto_pairs(results_dir, tanimoto_filename, top_n=100, group="inter"):
     """
     Save the top N pairs of molecules with the highest Tanimoto similarity.
     """
     tanimoto_path = os.path.join(results_dir, tanimoto_filename)
     df = pd.read_csv(tanimoto_path)
-    # Assume columns: 'mol_1', 'mol_2', 'tanimoto'
-    if not {'mol_1', 'mol_2', 'tanimoto'}.issubset(df.columns):
-        raise ValueError("Tanimoto file must contain 'mol_1', 'mol_2', and 'tanimoto' columns.")
+    # Columns: 'filename', 'mol_1', 'mol_2', 'tanimoto'
+    required_cols = {'filename', 'mol_1', 'mol_2', 'tanimoto'}
+    if not required_cols.issubset(df.columns):
+        raise ValueError(f"Tanimoto file must contain columns: {required_cols}. Found columns: {list(df.columns)}")
     top_pairs = df.nlargest(top_n, 'tanimoto').copy()
     output_filename = f"top{top_n}_tanimoto_pairs_{group}.csv"
     output_path = os.path.join(results_dir, output_filename)
+    # Save all columns, including 'filename'
     top_pairs.to_csv(output_path, index=False)
     print(f"Saved top {top_n} Tanimoto pairs to {output_filename}")
 
