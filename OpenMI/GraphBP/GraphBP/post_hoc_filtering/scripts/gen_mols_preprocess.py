@@ -1,5 +1,6 @@
 import os
 from rdkit import Chem
+from rdkit.Chem import rdFingerprintGenerator
 
 def load_mols_from_sdf_folder(folder_path):
     mols = []
@@ -12,4 +13,9 @@ def load_mols_from_sdf_folder(folder_path):
                 mols.append(mol)
                 smiles.append(Chem.MolToSmiles(mol))
                 filenames.append(filename)
-    return mols, smiles, filenames
+
+    # Generate Morgan fingerprints
+    generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    fps = [generator.GetFingerprint(mol) for mol in mols]
+
+    return mols, smiles, filenames, fps
