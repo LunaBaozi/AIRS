@@ -23,7 +23,3 @@ def read_aurora_kinase_interactions(csv_path, smiles_col='smiles'):
     fps = [generator.GetFingerprint(mol) for mol in mols]
 
     return mols, smiles, filenames, fps
-
-
-# _, smiles, filenames, _ = read_aurora_kinase_interactions('/vol/data/airs_unbroken/AIRS/OpenMI/GraphBP/GraphBP/post_hoc_filtering/data/aurora_kinase_B_interactions.csv', smiles_col='smiles')
-# print(smiles)
