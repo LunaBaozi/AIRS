@@ -22,7 +22,8 @@ def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     post_hoc_dir = os.path.join(base_dir, 'post_hoc_filtering')
     scripts = [
-        os.path.join(post_hoc_dir, 'synthesizability_scores.py'),
+        # os.path.join(post_hoc_dir, 'synthesizability_scores.py'),
+        os.path.join(post_hoc_dir, 'lipinski.py'),
         # os.path.join(post_hoc_dir, 'tanimoto_inter.py'),
         # os.path.join(post_hoc_dir, 'tanimoto_intra.py'),
         # os.path.join(post_hoc_dir, 'lipinski.py'),

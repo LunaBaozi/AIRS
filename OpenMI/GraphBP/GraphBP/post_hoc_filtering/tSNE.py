@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 
 
 df = pd.read_csv('results_epoch_99_mols_1000_bs_False/molecule_scores_99_1000.csv')
+# df = pd.read_csv('results_epoch_99_mols_2500_bs_False/molecule_scores_99_2500.csv')
+
 
 # Generate Morgan fingerprints (as numpy arrays)
 def smiles_to_fp(smiles, n_bits=2048):

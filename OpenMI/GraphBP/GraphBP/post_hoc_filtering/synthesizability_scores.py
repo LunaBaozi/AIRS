@@ -12,7 +12,7 @@ from syba.syba import SybaClassifier
 
 from scripts import scscorer_standalone 
 from scripts.aurk_int_preprocess import read_aurora_kinase_interactions
-
+from scripts.gen_mols_preprocess import load_mols_from_sdf_folder
 
 # Initialize SCScorer
 scscorer = scscorer_standalone.SCScorer()
@@ -21,24 +21,6 @@ scscorer.restore()
 # Initialize SybaClassifier
 syba = SybaClassifier()
 syba.fitDefaultScore()
-
-
-def str2bool(v):
-    """
-    Converts a string representation of a boolean to a boolean.
-    Args:
-        v (str): The string to convert.
-    Returns:
-        bool: The converted boolean value.
-    """
-    if isinstance(v, bool):
-        return v
-    if v == 'True':
-        return True
-    elif v == 'False':
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def sdf_to_mol(sdf_path, mol_path):
@@ -57,32 +39,32 @@ def sdf_to_mol(sdf_path, mol_path):
 
 def calculate_sa_score(mol):
     """
-    Calculates the Synthetic Accessibility Score (SAS) for a given molecule.
+    Calculates the Synthetic Accessibility Score (SA_Score) for a given molecule.
     Args:
         mol (rdkit.Chem.rdchem.Mol): The RDKit molecule object.
     Returns:
-        float: The SAS score of the molecule.
+        float: The SA_Score score of the molecule.
     """
     return sascorer.calculateScore(mol) 
 
 def calculate_sc_score(smi):
     """
-    Calculates the Synthetic Accessibility Score (SAS) for a given molecule.
+    Calculates the Synthetic Complexity Score (SCScore) for a given molecule.
     Args:
         mol (rdkit.Chem.rdchem.Mol): The RDKit molecule object.
     Returns:
-        float: The SAS score of the molecule.
+        float: The SCScore score of the molecule.
     """
     return scscorer.get_score_from_smi(smi)
 
 
 def calculate_np_score(mol):
     """
-    Calculates the Novelty and Predictability (NP) score for a given molecule.
+    Calculates the Natural Product-likeness (NP_score) score for a given molecule.
     Args:
         mol (rdkit.Chem.rdchem.Mol): The RDKit molecule object.
     Returns:
-        tuple: A tuple containing the NP score and its confidence.
+        tuple: A tuple containing the NP_score and its confidence.
     """
     fscore = npscorer.readNPModel()
     score = npscorer.scoreMol(mol, fscore)
@@ -92,34 +74,20 @@ def calculate_np_score(mol):
 
 def calculate_syba_score(smi):
     """
-    Calculates the Synthetic Accessibility Score (SAS) for a given molecule.
+    Calculates the SYnthetic Bayesian Accessibility Score (SYBA_score) for a given molecule.
     Args:
         mol (rdkit.Chem.rdchem.Mol): The RDKit molecule object.
     Returns:
-        float: The SAS score of the molecule.
+        float: The SYBA_score of the molecule.
     """
     return syba.predict(smi)
 
-
-def load_mols_from_sdf_folder(folder_path):
-    mols = []
-    smiles = []
-    filenames = []
-    for filename in os.listdir(folder_path):
-        if filename.endswith('.sdf'):
-            mol = Chem.SDMolSupplier(os.path.join(folder_path, filename))[0]
-            if mol is not None:
-                mols.append(mol)
-                smiles.append(Chem.MolToSmiles(mol))
-                filenames.append(filename)
-    return mols, smiles, filenames
-    
 
 def calculate_scores(mols, smiles, filenames):
     results = []
     for mol, smi, fn in zip(mols, smiles, filenames):
         if mol is None:
-            continue
+            raise Exception('Not a valid mol')
         sa_score = calculate_sa_score(mol)
         np_score, _ = calculate_np_score(mol)
         (smi, sc_score) = calculate_sc_score(smi)
@@ -138,11 +106,11 @@ def calculate_scores(mols, smiles, filenames):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Wrapper for AIRS pipeline.")
-    parser.add_argument('--num_gen', type=int, required=False, default=0, help='Number of generations')
-    parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number')
-    parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Known binding site')
-    parser.add_argument('--aurora', type=str, required=True, help='Aurora kinase')
+    parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeted to Aurora protein kinases.")
+    parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
+    parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
+    parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
+    parser.add_argument('--aurora', type=str, required=True, help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
     num_gen = args.num_gen
@@ -155,22 +123,23 @@ if __name__ == "__main__":
     sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf")
     known_inhib_file = os.path.join(script_dir, f"data/aurora_kinase_{aurora}_interactions.csv")
     results_dir = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
-    csv_path = os.path.join(results_dir, f"synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
+    output_csv = os.path.join(results_dir, f"synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
     
-    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     
     if epoch != 0:
         # Calculating scores for generated molecules
         mols, smiles, filenames = load_mols_from_sdf_folder(sdf_folder)
         synth = calculate_scores(mols, smiles, filenames)
-        synth.to_csv(csv_path, index=False)
+        synth.to_csv(output_csv, index=False)
 
     else:
         # Calculating scores for Aurora inhibitors
         mols, smiles, filenames, fps = read_aurora_kinase_interactions(known_inhib_file)
         synth = calculate_scores(mols, smiles, filenames)
-        synth.to_csv(csv_path, index=False)
+        synth.to_csv(output_csv, index=False)
 
+    print(f"Synthesizability scores saved to {output_csv}")
 
 
 # NOTE: The SA_Score ranges from 1 to 10 with 1 being easy to make and 10 being hard to make.
