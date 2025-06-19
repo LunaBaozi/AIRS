@@ -3,7 +3,7 @@ import argparse
 import itertools
 
 from rdkit import Chem
-from rdkit.Chem import DataStructs, rdFingerprintGenerator
+from rdkit.Chem import DataStructs
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,22 +11,6 @@ import matplotlib.pyplot as plt
 from scripts.aurk_int_preprocess import read_aurora_kinase_interactions
 from scripts.gen_mols_preprocess import load_mols_from_sdf_folder
 
-
-# def get_mol_fps_and_smiles(sdf_folder):
-#     fps = []
-#     smiles_list = []
-#     for fname in os.listdir(sdf_folder):
-#         if fname.endswith('.sdf'):
-#             sdf_path = os.path.join(sdf_folder, fname)
-#             suppl = Chem.SDMolSupplier(sdf_path)
-#             for mol in suppl:
-#                 if mol is not None:
-#                     generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
-#                     fp = generator.GetFingerprint(mol)
-#                     smiles = Chem.MolToSmiles(mol)
-#                     fps.append(fp)
-#                     smiles_list.append(smiles)
-#     return smiles_list, fps
 
 def compute_tanimoto_scores(smiles, filenames, fps):
     n = len(fps)
