@@ -21,7 +21,7 @@ def compute_tanimoto_scores(smi1, fn1, fps1, smi2, fn2, fps2):
         for j, tanimoto in enumerate(scores):
             mat[i, j] = scores[j]
             results.append({
-                "mol_1": fn1[i],
+                "filename": fn1[i],
                 "smi_1": smi1[i],
                 "mol_2": fn2[j],
                 "smi_2": smi2[j],
