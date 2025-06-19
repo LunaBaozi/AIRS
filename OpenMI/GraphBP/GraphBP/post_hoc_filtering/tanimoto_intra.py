@@ -103,4 +103,4 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig(os.path.join(results_dir, f"tanimoto_heatmap_intra_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png"))
     plt.close()
-    print(f"Lower triangular heatmap saved to {output_csv}")
+    print(f"Lower triangular heatmap saved to {results_dir}")
