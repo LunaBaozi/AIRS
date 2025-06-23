@@ -8,3 +8,13 @@
 *.json
 *.log
 *.pth
+analyses/
+*.map
+*.pdb
+*.fld
+*.xyz
+*.pdbqt
+*.dat
+*.txt
+*.glg
+*.gpf

@@ -44,11 +44,11 @@ def main():
     ]
 
     python_scripts = [
-        os.path.join(post_hoc_dir, 'synthesizability_scores.py'),
-        os.path.join(post_hoc_dir, 'lipinski.py'),
-        os.path.join(post_hoc_dir, 'tanimoto_intra.py'),
-        os.path.join(post_hoc_dir, 'tanimoto_inter.py'),
-        os.path.join(post_hoc_dir, 'graphics.py'),
+        # os.path.join(post_hoc_dir, 'synthesizability_scores.py'),
+        # os.path.join(post_hoc_dir, 'lipinski.py'),
+        # os.path.join(post_hoc_dir, 'tanimoto_intra.py'),
+        # os.path.join(post_hoc_dir, 'tanimoto_inter.py'),
+        # os.path.join(post_hoc_dir, 'graphics.py'),
         os.path.join(post_hoc_dir, 'post_processing.py'),
     ]
 
@@ -79,9 +79,11 @@ def main():
     for script in python_scripts:
         run_script(script, python_param_args)
 
-    for script in bash_scripts:
-        run_bash_script_in_conda(script, bash_param_args, conda_env='vina')
+    # for script in bash_scripts:
+    #     run_bash_script_in_conda(script, bash_param_args, conda_env='vina')
 
+    run_script(os.path.join(docking_dir, 'top_scoring_docking.py'), python_param_args)
+    
     end_time = time.time() - start_time
     print(f"Whole pipeline executed in {end_time:.2f} seconds")
 

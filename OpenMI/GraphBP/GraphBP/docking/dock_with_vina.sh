@@ -1,0 +1,32 @@
+# config.sh - Configuration file for run_pipeline.sh
+
+# === Set script directory ===
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Script directory: $SCRIPT_DIR"
+
+# === Configuration ===
+# Default values
+RECEPTOR=""
+RECEPTOR_PREFIX=""
+CENTER=""
+SIZE="20 20 20"
+EXHAUST="8"
+
+MOLS="$1"  # Number of molecules
+EPOCH="$2"  # Epoch number
+BS="$3"    # Batch size
+AURORA="$4"  # Aurora version
+
+if [[ "$AURORA" == "B" ]]; then
+    RECEPTOR="$SCRIPT_DIR/4af3/4af3.pdb"
+    RECEPTOR_PREFIX="4af3"
+    CENTER="16 -18 2"
+elif [[ "$AURORA" == "A" ]]; then
+    RECEPTOR="$SCRIPT_DIR/4ceg/4ceg_1_protein.pdb"
+    RECEPTOR_PREFIX="4ceg_receptor"
+    CENTER="10 20 5"
+else
+    echo "Error: --aurora argument must be A or B"
+    exit 1
+fi
+

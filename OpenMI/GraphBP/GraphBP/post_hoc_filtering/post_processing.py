@@ -58,9 +58,14 @@ def copy_top_50_ligands(mols, top_50_sa_score, dest_ligand_dir):
     for fname, mol in mols_map.items():
         if mol is not None:
             mol = Chem.AddHs(mol)
-            sdf_path = os.path.join(dest_ligand_dir, fname)
+            # Ensure .sdf extension
+            if not fname.lower().endswith('.sdf'):
+                fname_out = fname + '.sdf'
+            else:
+                fname_out = fname
+            sdf_path = os.path.join(dest_ligand_dir, fname_out)
             with Chem.SDWriter(sdf_path) as writer:
-                    writer.write(mol)
+                writer.write(mol)
         else:
             print(f"Warning: Could not parse mol for {fname}")
 
@@ -86,7 +91,15 @@ if __name__ == "__main__":
     synth_csv = os.path.join(results_dir, f"synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
     lipinski_csv = os.path.join(results_dir, f"lipinski_pass_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
     tanimoto_inter_csv = os.path.join(results_dir, f"tanimoto_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
-    dest_dir = os.path.join(parent_dir, f"docking/experiment_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/ligands")
+
+    if aurora == "A":
+        aur_type = '4cfg'
+    elif aurora == "B":
+        aur_type = '4af3'
+    else:
+        raise ValueError("Aurora type must be 'A' or 'B'.")
+    
+    dest_dir = os.path.join(parent_dir, f"docking/{aur_type}/experiment_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/ligands")
 
     output_csv = os.path.join(results_dir, f"merged_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
     top_100_output_csv = os.path.join(results_dir, f"top_100_tanimoto_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
