@@ -26,6 +26,8 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
     # Read CSVs
     sa_df = pd.read_csv(sa_score_csv)
     vina_df = pd.read_csv(vina_csv)
+    # Add ".sdf" to each entry in the "ligand" column
+    vina_df['ligand'] = vina_df['ligand'].astype(str) + '.sdf'
 
     # Merge on a common column, assuming 'name' is present in both
     merged = pd.merge(sa_df, vina_df, left_on='filename', right_on='ligand', suffixes=('_sa', '_vina'))
@@ -47,7 +49,7 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
     cbar = plt.colorbar(scatter)
     cbar.set_label('Tanimoto')
     plt.tight_layout()
-    plt.savefig("4af3/experiment_epoch_0_mols_0_bs_0_aurora_B/sa_vs_affinity_plot.png")
+    plt.savefig(output_plot_name)
     plt.show()
 
 
@@ -86,8 +88,11 @@ if __name__ == "__main__":
     experiment_dir = os.path.join(script_dir, f"{aur_type}/experiment_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
     vina_csv = os.path.join(experiment_dir, f"vina_results.csv")
     vina_postprocess = os.path.join(experiment_dir, "vina_results_postprocessed.csv")
+    output_plot_name = os.path.join(experiment_dir, "sa_vs_affinity_plot.png")
+
 
     os.makedirs(os.path.dirname(vina_postprocess), exist_ok=True)
+    os.makedirs(os.path.dirname(output_plot_name), exist_ok=True)
 
     postprocess_vina_results(
         vina_csv,

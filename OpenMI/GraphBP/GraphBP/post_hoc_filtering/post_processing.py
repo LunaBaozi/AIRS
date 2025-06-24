@@ -27,7 +27,7 @@ def merge_on_smiles(synth_path,
     print(set(scores_df['filename']) == set(tanimoto_df['filename']))
 
     desired_columns = [
-        'filename', 'smiles', 'len_smiles', 'SA_score', 'NP_score', 'SCScore', 'Syba_score',
+        'filename', 'smiles', 'len_smiles', 'SA_score', 'NP_score', 'SCScore',
         'mol_2', 'tanimoto', 'passed', 'failed'
     ] 
     columns_to_use = [col for col in desired_columns if col in merged_df.columns]
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     if epoch != 0:
         # Calculating scores for generated molecules
-        mols, smiles, filenames = load_mols_from_sdf_folder(sdf_folder)
+        mols, smiles, filenames, fps = load_mols_from_sdf_folder(sdf_folder)
 
 
     else:

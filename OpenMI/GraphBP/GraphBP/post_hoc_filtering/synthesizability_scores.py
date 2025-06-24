@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.environ['CONDA_PREFIX'],'share','RDKit','Contrib
 from rdkit import Chem
 from SA_Score import sascorer 
 from NP_Score import npscorer
-from syba.syba import SybaClassifier
+# from syba.syba import SybaClassifier
 
 
 from scripts import scscorer_standalone 
@@ -19,8 +19,8 @@ scscorer = scscorer_standalone.SCScorer()
 scscorer.restore()
 
 # Initialize SybaClassifier
-syba = SybaClassifier()
-syba.fitDefaultScore()
+# syba = SybaClassifier()
+# syba.fitDefaultScore()
 
 
 def sdf_to_mol(sdf_path, mol_path):
@@ -72,15 +72,15 @@ def calculate_np_score(mol):
     return score, confidence
 
 
-def calculate_syba_score(smi):
-    """
-    Calculates the SYnthetic Bayesian Accessibility Score (SYBA_score) for a given molecule.
-    Args:
-        mol (rdkit.Chem.rdchem.Mol): The RDKit molecule object.
-    Returns:
-        float: The SYBA_score of the molecule.
-    """
-    return syba.predict(smi)
+# def calculate_syba_score(smi):
+#     """
+#     Calculates the SYnthetic Bayesian Accessibility Score (SYBA_score) for a given molecule.
+#     Args:
+#         mol (rdkit.Chem.rdchem.Mol): The RDKit molecule object.
+#     Returns:
+#         float: The SYBA_score of the molecule.
+#     """
+#     return syba.predict(smi)
 
 
 def calculate_scores(mols, smiles, filenames):
@@ -91,7 +91,7 @@ def calculate_scores(mols, smiles, filenames):
         sa_score = calculate_sa_score(mol)
         np_score, _ = calculate_np_score(mol)
         (smi, sc_score) = calculate_sc_score(smi)
-        syba_score = calculate_syba_score(smi)
+        # syba_score = calculate_syba_score(smi)
         results.append({
             'filename': fn,
             'smiles': smi,
@@ -99,7 +99,7 @@ def calculate_scores(mols, smiles, filenames):
             'SA_score': sa_score,
             'SCScore': sc_score,
             'NP_score': np_score,
-            'Syba_score': syba_score
+            # 'Syba_score': syba_score
         })
     return pd.DataFrame(results)
 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     
     if epoch != 0:
         # Calculating scores for generated molecules
-        mols, smiles, filenames = load_mols_from_sdf_folder(sdf_folder)
+        mols, smiles, filenames, fps = load_mols_from_sdf_folder(sdf_folder)
         synth = calculate_scores(mols, smiles, filenames)
         synth.to_csv(output_csv, index=False)
 

@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     if epoch != 0:
         # Calculating scores for generated molecules
-        mols, smiles, filenames = load_mols_from_sdf_folder(sdf_folder)
+        mols, smiles, filenames, fps = load_mols_from_sdf_folder(sdf_folder)
         lipinski = evaluate_lipinski_rules(mols, smiles, filenames)
         lipinski.to_csv(output_csv, index=False)
 

@@ -51,6 +51,33 @@ def plot_len_smiles(df):
     plt.savefig(os.path.join(results_dir, f"len_smiles_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png"))
     return
 
+def pie_chart_len_smiles(df):
+    # Define bins for SMILES length
+    bins = [0, 20, 40, 60, 80, float('inf')]
+    labels = [
+        '≤20 chars',
+        '21-40 chars',
+        '41-60 chars',
+        '61-80 chars',
+        '>80 chars'
+    ]
+    df['len_bin'] = pd.cut(df['len_smiles'], bins=bins, labels=labels, right=True, include_lowest=True)
+    counts = df['len_bin'].value_counts().reindex(labels)
+
+    plt.figure(figsize=(8, 6))
+    plt.pie(
+        counts,
+        labels=counts.index,
+        autopct='%1.1f%%',
+        startangle=140,
+        colors=plt.cm.Set2.colors
+    )
+    plt.title('SMILES Length Distribution')
+    plt.axis('equal')
+    plt.savefig(os.path.join(results_dir, f"len_smiles_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png"))
+    plt.show()
+    return
+
 
 
 
@@ -422,6 +449,35 @@ def pie_chart_sc_score(df):
     plt.savefig(os.path.join(results_dir, f"sc_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png"))
     return
 
+def pie_chart_np_score(df):
+    labels = [
+        'NP_score ≤ -2 (Very synthetic-like)',
+        '-2 < NP_score ≤ 0 (Balanced)',
+        '0 < NP_score ≤ 2 (Natural-like)',
+        'NP_score > 2 (Very natural-like)'
+    ]
+
+    df['NP_bin'] = pd.cut(
+        df['NP_score'],
+        bins=[-float('inf'), -2, 0, 2, float('inf')],
+        labels=labels
+    )
+
+    np_counts = df['NP_bin'].value_counts().reindex(labels)
+
+    plt.figure(figsize=(8, 6))
+    plt.pie(
+        np_counts,
+        labels=np_counts.index,
+        autopct='%1.1f%%',
+        startangle=140,
+        colors=plt.cm.Set3.colors
+    )
+    plt.title('Natural Product-likeness (NP_score) Distribution')
+    plt.axis('equal')
+    plt.savefig(os.path.join(results_dir, f"np_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png"))
+    return
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeted to Aurora protein kinases.")
     parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
@@ -467,3 +523,5 @@ if __name__ == "__main__":
     plot_lipinski_violations_piechart(lipinski_df)
     pie_chart_sa_score(synth_df)
     pie_chart_sc_score(synth_df)
+    pie_chart_np_score(synth_df)
+    pie_chart_len_smiles(synth_df)

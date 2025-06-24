@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
     if epoch != 0:
         # Calculating scores for generated molecules
-        mols_gen, smiles_gen, filenames_gen, fps_gen = load_mols_from_sdf_folder(sdf_folder)
-        mols_aur, smiles_aur, filenames_aur, fps_aur = read_aurora_kinase_interactions(known_inhib_file)        
-        tanimoto = compute_tanimoto_scores(smiles_gen, filenames_gen, fps_gen, smiles_aur, filenames_aur, fps_aur)
+        mols1, smiles1, filenames1, fps1 = load_mols_from_sdf_folder(sdf_folder)
+        mols2, smiles2, filenames2, fps2 = read_aurora_kinase_interactions(known_inhib_file)        
+        tanimoto, mat = compute_tanimoto_scores(smiles1, filenames1, fps1, smiles2, filenames2, fps2)
         tanimoto.to_csv(output_csv, index=False)
 
 
