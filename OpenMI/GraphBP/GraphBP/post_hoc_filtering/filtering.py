@@ -2,28 +2,26 @@ import os
 import argparse
 import pandas as pd
 
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v == 'True':
-        return True
-    elif v == 'False':
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+# def str2bool(v):
+#     if isinstance(v, bool):
+#         return v
+#     if v == 'True':
+#         return True
+#     elif v == 'False':
+#         return False
+#     else:
+#         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def get_top100_per_metric(results_dir, input_filename):
     input_path = os.path.join(results_dir, input_filename)
     df = pd.read_csv(input_path)
 
-    # "filename" is now the first column, "smiles" is the second
     filename_col = "filename"
     mol_id_col = "smiles"
 
     # Load Lipinski violations
     lipinski_path = os.path.join(results_dir, f"lipinski_pass_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}.csv")
     lipinski_df = pd.read_csv(lipinski_path)
-    # Assume molecule id is the "smiles" column in both files
     violations_col = 'failed'
     if violations_col not in lipinski_df.columns:
         raise ValueError(f"Column '{violations_col}' not found in Lipinski file.")
@@ -166,22 +164,31 @@ def combine_all_metrics(
     merged_df.to_csv(os.path.join(results_dir, output_filename), columns=columns, index=False)
     print(f"Combined metrics saved to {output_filename}")
 
+os.makedirs(os.path.dirname(output_csv), exist_ok=True)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Filter and rank molecules based on metrics and Tanimoto similarity.")
-    parser.add_argument('--epoch', type=int, required=True, help='Epoch number')
-    parser.add_argument('--num_gen', type=int, required=True, help='Number of molecules generated')
-    parser.add_argument('--known_binding_site', type=str2bool, required=True, help='Known binding site (True/False)')
+    parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeted to Aurora protein kinases.")
+    parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
+    parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
+    parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
+    parser.add_argument('--aurora', type=str, required=True, help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
-    epoch = args.epoch
     num_gen = args.num_gen
     known_binding_site = args.known_binding_site
+    epoch = args.epoch
+    aurora = args.aurora
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    results_folder = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}")
+    parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
+    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf")
+    known_inhib_file = os.path.join(script_dir, f"data/aurora_kinase_{aurora}_interactions.csv")
+    results_dir = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
+    # output_csv = os.path.join(results_dir, f"tanimoto_intra_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
     
+    
+
     # Uncomment if you want to run top100 per metric as well:
     get_top100_per_metric(results_folder, f"molecule_scores_{epoch}_{num_gen}.csv")
     get_top_tanimoto_pairs(results_folder, "tanimoto_results_inter.csv", top_n=100, group="inter")

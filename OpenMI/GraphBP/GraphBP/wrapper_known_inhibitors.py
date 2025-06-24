@@ -25,7 +25,6 @@ def run_bash_script_in_conda(script_path, args, conda_env):
     subprocess.run(["bash", "-c", command], check=True)
 
 
-
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeted to Aurora protein kinases.")
     parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
@@ -36,6 +35,8 @@ def main():
 
     # Paths
     base_dir = os.path.dirname(os.path.abspath(__file__))
+    main_gen_path = os.path.join(base_dir, 'main_gen.py')
+    main_eval_path = os.path.join(base_dir, 'main_eval.py')
     post_hoc_dir = os.path.join(base_dir, 'post_hoc_filtering')
     docking_dir = os.path.join(base_dir, 'docking')
     
@@ -44,11 +45,11 @@ def main():
     ]
 
     python_scripts = [
-        # os.path.join(post_hoc_dir, 'synthesizability_scores.py'),
-        # os.path.join(post_hoc_dir, 'lipinski.py'),
-        # os.path.join(post_hoc_dir, 'tanimoto_intra.py'),
-        # os.path.join(post_hoc_dir, 'tanimoto_inter.py'),
-        # os.path.join(post_hoc_dir, 'graphics.py'),
+        os.path.join(post_hoc_dir, 'synthesizability_scores.py'),
+        os.path.join(post_hoc_dir, 'lipinski.py'),
+        os.path.join(post_hoc_dir, 'tanimoto_intra.py'),
+        os.path.join(post_hoc_dir, 'tanimoto_inter.py'),
+        os.path.join(post_hoc_dir, 'graphics.py'),
         os.path.join(post_hoc_dir, 'post_processing.py'),
     ]
 
@@ -67,7 +68,13 @@ def main():
     ]
 
     # Run analyses and measure execution time
-    start_time = time.time()
+    start_gen = time.time()
+    run_script(main_gen_path, python_param_args)
+    gen_time = time.time() - start_gen
+
+    start_eval = time.time()
+    run_script(main_eval_path, python_param_args)
+    eval_time = time.time() - start_eval
 
     results_dir = os.path.join(
         base_dir,
@@ -76,16 +83,26 @@ def main():
     )
     os.makedirs(results_dir, exist_ok=True)
     
+    start_filtering = time.time()
     for script in python_scripts:
         run_script(script, python_param_args)
+    filtering_time = time.time() - start_filtering
 
-    # for script in bash_scripts:
-    #     run_bash_script_in_conda(script, bash_param_args, conda_env='vina')
+    start_docking = time.time()
+    for script in bash_scripts:
+        run_bash_script_in_conda(script, bash_param_args, conda_env='vina')
 
     run_script(os.path.join(docking_dir, 'top_scoring_docking.py'), python_param_args)
+    docking_time = time.time() - start_docking
     
-    end_time = time.time() - start_time
-    print(f"Whole pipeline executed in {end_time:.2f} seconds")
+    end_time = time.time() - start_gen
+
+    with open(os.path.join(results_dir, f"elapsed_time_{args.epoch}_{args.num_gen}_{args.known_binding_site}_{args.aurora}.txt"), "w") as f:
+        f.write(f"Whole pipeline executed in: " + time.strftime("%H:%M:%S", time.gmtime(end_time)) + "\n")  
+        f.write(f"Generation executed in: " + time.strftime("%H:%M:%S", time.gmtime(gen_time)) + "\n")
+        f.write(f"Evaluation executed in: " + time.strftime("%H:%M:%S", time.gmtime(eval_time)) + "\n")
+        f.write(f"Post-hoc filtering executed in: " + time.strftime("%H:%M:%S", time.gmtime(filtering_time)) + "\n")
+        f.write(f"Docking executed in: " + time.strftime("%H:%M:%S", time.gmtime(docking_time)) + "\n")
 
 if __name__ == '__main__':
     main()

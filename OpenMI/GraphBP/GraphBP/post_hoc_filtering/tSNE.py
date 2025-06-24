@@ -40,7 +40,18 @@ if __name__ == "__main__":
         mols, smiles, filenames, fps = read_aurora_kinase_interactions(known_inhib_file)
     
     synth_df = pd.read_csv(os.path.join(results_dir, f"synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv"))
-    tsne = TSNE(n_components=2, random_state=42, perplexity=30)
+    n_samples = len(fps)
+    if n_samples <= 1:
+        raise ValueError("At least 2 samples are required for t-SNE.")
+    if n_samples <= 30:
+        perplexity = max(1, n_samples - 1)
+    else:
+        perplexity = 30
+    # Ensure perplexity is strictly less than n_samples
+    if perplexity >= n_samples:
+        perplexity = n_samples - 1
+    print(perplexity, n_samples)
+    tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity)
     tsne_results = tsne.fit_transform(np.stack(fps))
 
     plt.figure(figsize=(8,6))

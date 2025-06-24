@@ -1,6 +1,9 @@
 import os, argparse
 import csv
 import pandas as pd
+from matplotlib.patches import Wedge
+from matplotlib.cm import ScalarMappable
+from matplotlib.lines import Line2D
 
 import matplotlib.pyplot as plt
 
@@ -35,23 +38,112 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
     # Prepare data
     x = merged['SA_score']
     y = merged['affinity_kcal/mol']
-    colors = merged['tanimoto']
+    # Prepare colors for SCScore (left) and NP_score (right)
+
+    scscore = merged['SCScore']
+    npscore = merged['NP_score']
+
+    # Normalize scores for colormaps
+    sc_min, sc_max = scscore.min(), scscore.max()
+    np_min, np_max = npscore.min(), npscore.max()
+    sc_norm = (scscore - sc_min) / (sc_max - sc_min + 1e-8)
+    np_norm = (npscore - np_min) / (np_max - np_min + 1e-8)
+
+    sc_cmap = plt.get_cmap('Oranges')  # sa score
+    np_cmap = plt.get_cmap('Blues')  # np score
+    sc_colors = sc_cmap(sc_norm)  #(sc_norm)
+    np_colors = np_cmap(np_norm)  #(np_norm)
+
+    # Define edge colors (default to blue, or customize as needed)
     edge_colors = merged['failed'].apply(lambda v: 'red' if pd.notna(v) and str(v).strip() else 'blue')
 
-    # Plot
-    plt.figure(figsize=(8, 6))
-    scatter = plt.scatter(
-        x, y, c=colors, cmap='viridis', edgecolors=edge_colors, linewidths=1, s=60
-    )
-    plt.xlabel('SA_score')
-    plt.ylabel('affinity_kcal/mol')
-    plt.title('SA_score vs. affinity_kcal/mol')
-    cbar = plt.colorbar(scatter)
-    cbar.set_label('Tanimoto')
-    plt.tight_layout()
-    plt.savefig(output_plot_name)
-    plt.show()
+    # Custom scatter: draw two semicircles for each point
+    fig, ax = plt.subplots(figsize=(8, 6))
+    for xi, yi, sc_col, np_col, edge_col in zip(x, y, sc_colors, np_colors, edge_colors):
+        # Left semicircle (SCScore)
+        wedge1 = Wedge((xi, yi), 0.15, 90, 270, facecolor=sc_col, edgecolor=edge_col, linewidth=1)
+        # Right semicircle (NP_score)
+        wedge2 = Wedge((xi, yi), 0.15, 270, 90, facecolor=np_col, edgecolor=edge_col, linewidth=1)
+        ax.add_patch(wedge1)
+        ax.add_patch(wedge2)
 
+    ax.set_xlabel('SA_score')
+    ax.set_ylabel('affinity_kcal/mol')
+    ax.set_title('SA_score vs. affinity_kcal/mol')
+
+    # Add colorbars for SCScore and NP_score, position them to the right using add_axes for consistent height
+    sm_sc = ScalarMappable(cmap=sc_cmap, norm=plt.Normalize(sc_min, sc_max))
+    sm_np = ScalarMappable(cmap=np_cmap, norm=plt.Normalize(np_min, np_max))
+
+    # Shrink main plot to make space for colorbars
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
+
+    # Add first colorbar (SCScore)
+    cbar_ax1 = fig.add_axes([0.72, box.y0, 0.02, box.height])
+    cbar1 = fig.colorbar(sm_sc, cax=cbar_ax1)
+    cbar1.set_label('SCScore (left semicircle)', labelpad=15, rotation=270)
+
+    # Add second colorbar (NP_score)
+    cbar_ax2 = fig.add_axes([0.83, box.y0, 0.02, box.height])
+    cbar2 = fig.colorbar(sm_np, cax=cbar_ax2)
+    cbar2.set_label('NP_score (right semicircle)', labelpad=15, rotation=270)
+
+    # Add vertical lines (move labels to legend)
+    ax.axvline(x=6.5, color='green', linestyle='--', linewidth=2)
+    ax.axvline(x=3, color='yellow', linestyle='--', linewidth=2)
+    ax.axvline(x=2, color='orange', linestyle='--', linewidth=2)
+
+    # Add horizontal lines (move labels to legend)
+    ax.axhline(y=-6, color='pink', linestyle=':', linewidth=2)
+    ax.axhline(y=-8, color='purple', linestyle=':', linewidth=2)
+    ax.axhline(y=-9, color='blue', linestyle=':', linewidth=2)
+
+    # Find indices of points to label
+    idx_affinity = merged['affinity_kcal/mol'].astype(float).idxmin()
+    idx_sa = merged['SA_score'].astype(float).idxmin()
+    idx_sc = merged['SCScore'].astype(float).idxmin()
+    idx_np = merged['NP_score'].astype(float).idxmin()
+
+    label_indices = set([idx_affinity, idx_sa, idx_sc, idx_np])
+
+    for idx in label_indices:
+        xi = merged.loc[idx, 'SA_score']
+        yi = merged.loc[idx, 'affinity_kcal/mol']
+        ligand_label = merged.loc[idx, 'ligand']
+        ax.annotate(
+            ligand_label,
+            (xi, yi),
+            textcoords="offset points",
+            xytext=(0, -15),  # Place label below the point
+            ha='center',
+            va='top',
+            fontsize=8,
+            color='black',
+            bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.7, lw=0)
+        )
+
+    # Add a legend for the border colors of the sample points
+    legend_elements = [
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='red', markersize=10, label='Failed'),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='blue', markersize=10, label='Passed')
+    ]
+    ax.legend(handles=legend_elements, loc='upper left', title='Sample Point Borders')
+
+    # Add a custom legend for the lines
+    # legend_elements = [
+    #     Line2D([0], [0], color='green', linestyle='--', linewidth=2, label='x=6.5'),
+    #     Line2D([0], [0], color='yellow', linestyle='--', linewidth=2, label='x=3'),
+    #     Line2D([0], [0], color='orange', linestyle='--', linewidth=2, label='x=2'),
+    #     Line2D([0], [0], color='pink', linestyle=':', linewidth=2, label='y=-6'),
+    #     Line2D([0], [0], color='purple', linestyle=':', linewidth=2, label='y=-8'),
+    #     Line2D([0], [0], color='blue', linestyle=':', linewidth=2, label='y=-9'),
+    # ]
+    # ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+
+    plt.savefig(output_plot_name, bbox_inches='tight')
+    plt.show()
+    
 
 
 

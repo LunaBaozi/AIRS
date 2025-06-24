@@ -94,10 +94,12 @@ def main():
     parser.add_argument('--num_gen', type=int, default=1000, help='Number of molecules to generate for each reference rec-lig pair')
     parser.add_argument('--epoch', type=int, default=99, help='Epoch number to load the model from')
     parser.add_argument('--known_binding_site', type=str2bool, default=True, help='Whether to use known binding site information')
+    parser.add_argument('--aurora', type=str, required=False, default='A', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
     num_gen = args.num_gen
     known_binding_site = args.known_binding_site
+    aurora = args.aurora.upper()
     print('Known binding site in main_eval:', known_binding_site)
     epoch = args.epoch #if isinstance(args.epoch, list) else [args.epoch]
 
@@ -108,7 +110,7 @@ def main():
     save_sdf = True
     data_root = './data/crossdock2020'
     path = './trained_model_reduced_dataset_100_epochs'
-    all_mols_dict_path = os.path.join(path, f'epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}.mol_dict')
+    all_mols_dict_path = os.path.join(path, f'epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}.mol_dict')
 
     with open(all_mols_dict_path, 'rb') as f:
         all_mols_dict = pickle.load(f)
@@ -116,7 +118,7 @@ def main():
     bond_adder = BondAdder()
     # all_results_dict = {}
 
-    gen_mols_dir = os.path.join(path, f'gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}')
+    gen_mols_dir = os.path.join(path, f'gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}')
     os.makedirs(gen_mols_dir, exist_ok=True)
     os.makedirs(os.path.join(gen_mols_dir, 'images'), exist_ok=True)
     os.makedirs(os.path.join(gen_mols_dir, 'sdf'), exist_ok=True)

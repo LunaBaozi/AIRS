@@ -27,6 +27,7 @@ def main():
     parser.add_argument('--num_gen', type=int, default=1000, help='Number of molecules to generate for each reference rec-lig pair')
     parser.add_argument('--epoch', type=int, default=99, help='Epoch number to load the model from')
     parser.add_argument('--known_binding_site', type=str2bool, default=True, help='Whether to use known binding site information')
+    parser.add_argument('--aurora', type=str, required=False, default='A', help='Aurora kinase type (str, A, B)')
     
     args = parser.parse_args()
     
@@ -34,6 +35,7 @@ def main():
 
     num_gen = args.num_gen # number generate for each reference rec-lig pair
     known_binding_site = args.known_binding_site
+    aurora = args.aurora.upper()
     print('Known binding site in main_gen:', known_binding_site)
 
     node_temp = 0.5
@@ -65,7 +67,7 @@ def main():
             known_binding_site=known_binding_site
         )
         
-        with open(f'{trained_model_path}/epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}.mol_dict','wb') as f:
+        with open(f'{trained_model_path}/epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}.mol_dict','wb') as f:
             pickle.dump(all_mol_dicts, f)
 
 if __name__ == '__main__':

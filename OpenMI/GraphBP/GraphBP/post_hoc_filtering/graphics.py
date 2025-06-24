@@ -291,7 +291,18 @@ def plot_np_score(df):
 
 
 def plot_tSNE(fps):
-    tsne = TSNE(n_components=2, random_state=42, perplexity=30)
+    n_samples = len(fps)
+    # Set perplexity dynamically: must be < n_samples, typically between 5 and 50
+    if n_samples <= 5:
+        perplexity = max(2, n_samples - 1)
+    elif n_samples < 50:
+        perplexity = max(5, n_samples // 3)
+    else:
+        perplexity = 30
+    # Ensure perplexity is strictly less than n_samples
+    if perplexity >= n_samples:
+        perplexity = max(1, n_samples - 1)
+    tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity)
     tsne_results = tsne.fit_transform(np.stack(fps))
 
     plt.figure(figsize=(8,6))
@@ -493,7 +504,7 @@ if __name__ == "__main__":
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
-    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf")
+    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf")
     known_inhib_file = os.path.join(script_dir, f"data/aurora_kinase_{aurora}_interactions.csv")
     results_dir = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
     output_csv = os.path.join(results_dir, f"tanimoto_intra_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
