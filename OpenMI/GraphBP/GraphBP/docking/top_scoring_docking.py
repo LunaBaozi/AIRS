@@ -30,8 +30,16 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
     # Read CSVs
     sa_df = pd.read_csv(sa_score_csv)
     vina_df = pd.read_csv(vina_csv)
-    # Strip the extension from each entry in the "ligand" column (e.g., remove .sdf, .pdb, etc.)
-    vina_df['ligand'] = vina_df['ligand'].astype(str).str.replace(r'\.[^.]+$', '', regex=True)
+
+    # Add the .sdf extension to sa_df['filename'] if and only if the filename is numerical
+    vina_df['ligand'] = vina_df['ligand'].apply(
+        lambda x: f"{x}.sdf" if str(x).isdigit() else str(x)
+    )
+    # Ensure both columns are string type for merging
+    sa_df['filename'] = sa_df['filename'].astype(str)
+    vina_df['ligand'] = vina_df['ligand'].astype(str)
+
+
 
     merged = pd.merge(sa_df, vina_df, left_on='filename', right_on='ligand', suffixes=('_sa', '_vina'))
 
@@ -70,6 +78,8 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
         wedge2 = Wedge((xi, yi), 0.15, 270, 90, facecolor=np_col, edgecolor=edge_col, linewidth=1)
         ax.add_patch(wedge1)
         ax.add_patch(wedge2)
+    # Ensure circles are not stretched
+    ax.set_aspect('equal', adjustable='datalim')
 
     ax.set_xlabel('SA_score')
     ax.set_ylabel('affinity_kcal/mol')

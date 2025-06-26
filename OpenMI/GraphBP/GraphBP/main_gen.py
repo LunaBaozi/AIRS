@@ -45,8 +45,8 @@ def main():
 
     # min and max atoms calculated on the basis of known aurkb inhibitors
     # The numbers exclude H atoms
-    min_atoms = 20
-    max_atoms = 100
+    min_atoms = 25 #20
+    max_atoms = 42 #100
     focus_th = 0.5
     contact_th = 0.5
 
