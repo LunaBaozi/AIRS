@@ -1,5 +1,6 @@
 import os, argparse
 import csv
+import numpy as np
 import pandas as pd
 from matplotlib.patches import Wedge
 from matplotlib.cm import ScalarMappable
@@ -29,11 +30,14 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
     # Read CSVs
     sa_df = pd.read_csv(sa_score_csv)
     vina_df = pd.read_csv(vina_csv)
-    # Add ".sdf" to each entry in the "ligand" column
-    vina_df['ligand'] = vina_df['ligand'].astype(str) + '.sdf'
+    # Strip the extension from each entry in the "ligand" column (e.g., remove .sdf, .pdb, etc.)
+    vina_df['ligand'] = vina_df['ligand'].astype(str).str.replace(r'\.[^.]+$', '', regex=True)
 
-    # Merge on a common column, assuming 'name' is present in both
     merged = pd.merge(sa_df, vina_df, left_on='filename', right_on='ligand', suffixes=('_sa', '_vina'))
+
+    if merged.empty:
+        print("Warning: No matching rows after merging. Check that 'filename' in SA score CSV matches 'ligand' in Vina CSV (with .sdf appended).")
+        return
 
     # Prepare data
     x = merged['SA_score']
@@ -77,17 +81,17 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
 
     # Shrink main plot to make space for colorbars
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.75, box.height])
+    ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
 
     # Add first colorbar (SCScore)
-    cbar_ax1 = fig.add_axes([0.72, box.y0, 0.02, box.height])
+    cbar_ax1 = fig.add_axes([0.9, box.y0, 0.02, box.height])
     cbar1 = fig.colorbar(sm_sc, cax=cbar_ax1)
-    cbar1.set_label('SCScore (left semicircle)', labelpad=15, rotation=270)
+    cbar1.set_label('SCScore (L)', labelpad=20, rotation=270, fontsize=10, loc='center')
 
     # Add second colorbar (NP_score)
-    cbar_ax2 = fig.add_axes([0.83, box.y0, 0.02, box.height])
+    cbar_ax2 = fig.add_axes([1.05, box.y0, 0.02, box.height])
     cbar2 = fig.colorbar(sm_np, cax=cbar_ax2)
-    cbar2.set_label('NP_score (right semicircle)', labelpad=15, rotation=270)
+    cbar2.set_label('NP_score (R)', labelpad=20, rotation=270, fontsize=10, loc='center')
 
     # Add vertical lines (move labels to legend)
     ax.axvline(x=6.5, color='green', linestyle='--', linewidth=2)
@@ -115,7 +119,7 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
             ligand_label,
             (xi, yi),
             textcoords="offset points",
-            xytext=(0, -15),  # Place label below the point
+            xytext=(0, 15),  # Place label below the point
             ha='center',
             va='top',
             fontsize=8,
@@ -123,23 +127,42 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
             bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.7, lw=0)
         )
 
-    # Add a legend for the border colors of the sample points
-    legend_elements = [
-        Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='red', markersize=10, label='Failed'),
-        Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='blue', markersize=10, label='Passed')
-    ]
-    ax.legend(handles=legend_elements, loc='upper left', title='Sample Point Borders')
+    
 
-    # Add a custom legend for the lines
-    # legend_elements = [
-    #     Line2D([0], [0], color='green', linestyle='--', linewidth=2, label='x=6.5'),
-    #     Line2D([0], [0], color='yellow', linestyle='--', linewidth=2, label='x=3'),
-    #     Line2D([0], [0], color='orange', linestyle='--', linewidth=2, label='x=2'),
-    #     Line2D([0], [0], color='pink', linestyle=':', linewidth=2, label='y=-6'),
-    #     Line2D([0], [0], color='purple', linestyle=':', linewidth=2, label='y=-8'),
-    #     Line2D([0], [0], color='blue', linestyle=':', linewidth=2, label='y=-9'),
-    # ]
-    # ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+    # --- Pareto frontier (minimize both SA_score and affinity_kcal/mol) ---
+    # Sort by SA_score, then iterate to keep only points with lowest y so far
+    pareto_points = merged.sort_values(['SA_score', 'affinity_kcal/mol'])
+    pareto_front = []
+    pareto_indices = []
+    min_y = float('inf')
+    for idx, row in pareto_points.iterrows():
+        if row['affinity_kcal/mol'] < min_y:
+            pareto_front.append((row['SA_score'], row['affinity_kcal/mol']))
+            pareto_indices.append(idx)
+            min_y = row['affinity_kcal/mol']
+    if pareto_front:
+        pareto_front = np.array(pareto_front)
+        ax.plot(pareto_front[:, 0], pareto_front[:, 1], color='green', linewidth=2, marker='o', markersize=4, label='Pareto frontier')
+        # Save Pareto front rows to CSV
+        pareto_df = merged.loc[pareto_indices]
+        pareto_csv_path = f"{experiment_dir}/pareto_front.csv"
+        os.makedirs(os.path.dirname(pareto_csv_path), exist_ok=True)
+        pareto_df.to_csv(pareto_csv_path, index=False)
+        # Add to legend
+        handles, labels = ax.get_legend_handles_labels()
+        legend_elements = [
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='red', markersize=10, label='Failed'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='blue', markersize=10, label='Passed'),
+            Line2D([0], [0], color='green', linewidth=2, marker='o', markersize=6, label='Pareto frontier')
+        ]
+        labels.append('Pareto frontier')
+        ax.legend(handles=legend_elements, loc='upper left', title='Lipinski rules')
+    else:  # Add a legend for the border colors of the sample points
+        legend_elements = [
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='red', markersize=10, label='Failed'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='blue', markersize=10, label='Passed')
+        ]
+        ax.legend(handles=legend_elements, loc='upper left', title='Lipinski rules')
 
     plt.savefig(output_plot_name, bbox_inches='tight')
     plt.show()
