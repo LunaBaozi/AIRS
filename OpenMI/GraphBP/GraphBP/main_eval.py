@@ -90,18 +90,17 @@ def get_pocket(lig_mol, rec_mol, max_dist=8):
     return pkt_mol
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate generated molecules using the AIRS pipeline.")
-    parser.add_argument('--num_gen', type=int, default=1000, help='Number of molecules to generate for each reference rec-lig pair')
-    parser.add_argument('--epoch', type=int, default=99, help='Epoch number to load the model from')
-    parser.add_argument('--known_binding_site', type=str2bool, default=True, help='Whether to use known binding site information')
-    parser.add_argument('--aurora', type=str, required=False, default='A', help='Aurora kinase type (str, A, B)')
+    parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeting Aurora protein kinases.")
+    parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
+    parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
+    parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
+    parser.add_argument('--aurora', type=str, required=False, default='B', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
     num_gen = args.num_gen
     known_binding_site = args.known_binding_site
     aurora = args.aurora.upper()
-    print('Known binding site in main_eval:', known_binding_site)
-    epoch = args.epoch #if isinstance(args.epoch, list) else [args.epoch]
+    epoch = args.epoch 
 
     save_mol = False
     uff = True
@@ -116,7 +115,6 @@ def main():
         all_mols_dict = pickle.load(f)
 
     bond_adder = BondAdder()
-    # all_results_dict = {}
 
     gen_mols_dir = os.path.join(path, f'gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}')
     os.makedirs(gen_mols_dir, exist_ok=True)

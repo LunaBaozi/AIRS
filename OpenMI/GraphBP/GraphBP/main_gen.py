@@ -23,17 +23,16 @@ def str2bool(v):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate molecules using the AIRS pipeline.")
-    parser.add_argument('--num_gen', type=int, default=1000, help='Number of molecules to generate for each reference rec-lig pair')
-    parser.add_argument('--epoch', type=int, default=99, help='Epoch number to load the model from')
-    parser.add_argument('--known_binding_site', type=str2bool, default=True, help='Whether to use known binding site information')
-    parser.add_argument('--aurora', type=str, required=False, default='A', help='Aurora kinase type (str, A, B)')
-    
+    parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeting Aurora protein kinases.")
+    parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
+    parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
+    parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
+    parser.add_argument('--aurora', type=str, required=False, default='B', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
     
     runner = Runner(conf)
 
-    num_gen = args.num_gen # number generate for each reference rec-lig pair
+    num_gen = args.num_gen 
     known_binding_site = args.known_binding_site
     aurora = args.aurora.upper()
     print('Known binding site in main_gen:', known_binding_site)
@@ -43,10 +42,10 @@ def main():
     angle_temp = 0.4
     torsion_temp = 1.0
 
-    # min and max atoms calculated on the basis of known aurkb inhibitors
+    # Min and max atoms calculated on the basis of known Aurora kinase inhibitors
     # The numbers exclude H atoms
-    min_atoms = 25 #20
-    max_atoms = 42 #100
+    min_atoms = 25 # 20 (generic small molecules)
+    max_atoms = 42 # 100 (generic small molecules)
     focus_th = 0.5
     contact_th = 0.5
 

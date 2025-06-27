@@ -10,7 +10,7 @@ RECEPTOR=""
 RECEPTOR_PREFIX=""
 CENTER=""
 SIZE="20 20 20"
-EXHAUST="8"
+EXHAUST="32"
 
 MOLS="$1"  # Number of molecules
 EPOCH="$2"  # Epoch number
@@ -25,6 +25,10 @@ elif [[ "$AURORA" == "A" ]]; then
     RECEPTOR="$SCRIPT_DIR/4ceg/4ceg_1_protein.pdb"
     RECEPTOR_PREFIX="4ceg_receptor"
     CENTER="10 20 5"
+# elif [[ "$AURORA" == "C" ]]; then
+#     RECEPTOR="$SCRIPT_DIR/1iep/1iep.pdb"
+#     RECEPTOR_PREFIX="1iep"
+#     CENTER="15.190 53.903 16.917"
 else
     echo "Error: --aurora argument must be A or B"
     exit 1

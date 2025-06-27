@@ -5,6 +5,7 @@ import numpy as np
 sys.path.append(os.path.join(os.environ['CONDA_PREFIX'],'share','RDKit','Contrib'))
 
 from rdkit import Chem
+
 from rdkit.Chem import AllChem, DataStructs, rdFingerprintGenerator
 from rdkit.Chem import Lipinski, Descriptors, Crippen
 

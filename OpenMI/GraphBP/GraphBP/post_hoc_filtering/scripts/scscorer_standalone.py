@@ -9,13 +9,15 @@ import numpy as np
 import time
 import rdkit.Chem as Chem
 import rdkit.Chem.AllChem as AllChem
+from rdkit.Chem import rdFingerprintGenerator
 import json
 import gzip
 import six
 
 import os
-# project_root = os.path.dirname(os.path.dirname((__file__)))
-project_root = "/vol/data/airs/AIRS/OpenMI/GraphBP/GraphBP"
+project_root = os.path.dirname(os.path.dirname(os.path.dirname((__file__))))
+# print(project_root)
+# project_root = "/vol/data/airs/AIRS/OpenMI/GraphBP/GraphBP"
 
 
 score_scale = 5.0
@@ -42,6 +44,8 @@ class SCScorer():
             def mol_to_fp(self, mol):
                 if mol is None:
                     return np.array((self.FP_len,), dtype=np.uint8)
+                # generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+                # fp = generator.GetFingerprint(mol, self.FP_rad, useChirality=True)
                 fp = AllChem.GetMorganFingerprint(mol, self.FP_rad, useChirality=True) # uitnsparsevect
                 fp_folded = np.zeros((self.FP_len,), dtype=np.uint8)
                 for k, v in six.iteritems(fp.GetNonzeroElements()):
@@ -51,8 +55,10 @@ class SCScorer():
             def mol_to_fp(self, mol):
                 if mol is None:
                     return np.zeros((self.FP_len,), dtype=np.float32)
-                return np.array(AllChem.GetMorganFingerprintAsBitVect(mol, self.FP_rad, nBits=self.FP_len,
-                    useChirality=True), dtype=bool)
+                # generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+                # fp = generator.GetFingerprint(mol, self.FP_rad, nBits=self.FP_len, useChirality=True)
+                # np.array(fp, dtype=bool)
+                return np.array(AllChem.GetMorganFingerprintAsBitVect(mol, self.FP_rad, nBits=self.FP_len, useChirality=True), dtype=bool)
         self.mol_to_fp = mol_to_fp
 
         self._restored = True

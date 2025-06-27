@@ -21,21 +21,21 @@ def compute_tanimoto_scores(smi1, fn1, fps1, smi2, fn2, fps2):
         for j, tanimoto in enumerate(scores):
             mat[i, j] = scores[j]
             results.append({
-                "filename": fn1[i],
-                "smi_1": smi1[i],
-                "mol_2": fn2[j],
-                "smi_2": smi2[j],
-                "tanimoto": tanimoto
+                'filename': fn1[i],
+                'smi_1': smi1[i],
+                'mol_2': fn2[j],
+                'smi_2': smi2[j],
+                'tanimoto': tanimoto
             })
     return pd.DataFrame(results), mat
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeted to Aurora protein kinases.")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Wrapper for CADD pipeline targeting Aurora protein kinases.')
     parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
     parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
     parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
-    parser.add_argument('--aurora', type=str, required=True, help='Aurora kinase type (str, A, B)')
+    parser.add_argument('--aurora', type=str, required=False, default='B', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
     num_gen = args.num_gen
@@ -45,10 +45,10 @@ if __name__ == "__main__":
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
-    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf")
-    known_inhib_file = os.path.join(script_dir, f"data/aurora_kinase_{aurora}_interactions.csv")
-    results_dir = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
-    output_csv = os.path.join(results_dir, f"tanimoto_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
+    sdf_folder = os.path.join(parent_dir, f'trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf')
+    known_inhib_file = os.path.join(script_dir, f'data/aurora_kinase_{aurora}_interactions.csv')
+    results_dir = os.path.join(script_dir, f'results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}')
+    output_csv = os.path.join(results_dir, f'tanimoto_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
     
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
 
@@ -59,22 +59,18 @@ if __name__ == "__main__":
         tanimoto, mat = compute_tanimoto_scores(smiles1, filenames1, fps1, smiles2, filenames2, fps2)
         tanimoto.to_csv(output_csv, index=False)
 
-
     else:
         other_aurora = 'B' if aurora == 'A' else 'A'
         # Calculating scores for Aurora inhibitors
-        known_inhib_file2 = os.path.join(script_dir, f"data/aurora_kinase_{other_aurora}_interactions.csv")
+        known_inhib_file2 = os.path.join(script_dir, f'data/aurora_kinase_{other_aurora}_interactions.csv')
         mols1, smiles1, filenames1, fps1 = read_aurora_kinase_interactions(known_inhib_file)
         mols2, smiles2, filenames2, fps2 = read_aurora_kinase_interactions(known_inhib_file)
         tanimoto, mat = compute_tanimoto_scores(smiles1, filenames1, fps1, smiles2, filenames2, fps2)
         tanimoto.to_csv(output_csv, index=False)
 
-    print(f"Tanimoto inter scores saved to {output_csv}")
-
-    print("Generating heatmap...")
+    print(f'Tanimoto inter scores saved to {output_csv}')
  
-
-    print("Generating lower triangular heatmap...")
+    print('Generating lower triangular heatmap...')
 
     # Mask for lower triangle
     mask = np.tril(np.ones_like(mat, dtype=bool))
@@ -112,6 +108,6 @@ if __name__ == "__main__":
         rotation=0, ha='right', fontsize=7
     )
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, f"tanimoto_heatmap_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png"))
+    plt.savefig(os.path.join(results_dir, f'tanimoto_heatmap_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     plt.close()
-    print(f"Lower triangular heatmap saved to {output_csv}")
+    print(f'Lower triangular heatmap saved to {output_csv}/tanimoto_heatmap_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png')

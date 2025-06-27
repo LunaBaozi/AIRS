@@ -56,8 +56,8 @@ for sdf in "${sdf_files[@]}"; do
     # Prepare ligand
     if ! mk_prepare_ligand.py -i "$scrubbed" -o "$pdbqt"; then
         echo "Failed to prepare $base"
-        continue
     fi
+
 
     # Run Vina
     if ! vina --ligand "$pdbqt" --maps "$PREPARED_REC_DIR/$RECEPTOR_PREFIX" --scoring ad4 --exhaustiveness "$EXHAUST" --out "$out"; then

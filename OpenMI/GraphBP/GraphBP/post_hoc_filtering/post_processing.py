@@ -1,5 +1,4 @@
 import os, argparse
-import shutil
 import pandas as pd
 
 from rdkit import Chem
@@ -38,12 +37,12 @@ def merge_on_smiles(synth_path,
 
 
 def export_top_100_tanimoto(df):
-    return df.sort_values(by="tanimoto", ascending=False).head(100)
+    return df.sort_values(by='tanimoto', ascending=False).head(100)
 
 
 def export_top_50_sa_score(input_df):
-    df_sorted = input_df.sort_values(by="SA_score", ascending=True)    
-    return df_sorted.drop_duplicates(subset="filename").head(50)
+    df_sorted = input_df.sort_values(by='SA_score', ascending=True)    
+    return df_sorted.drop_duplicates(subset='filename').head(50)
 
 
 
@@ -67,15 +66,15 @@ def copy_top_50_ligands(mols, top_50_sa_score, dest_ligand_dir):
             with Chem.SDWriter(sdf_path) as writer:
                 writer.write(mol)
         else:
-            print(f"Warning: Could not parse mol for {fname}")
+            print(f'Warning: Could not parse mol for {fname}')
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeted to Aurora protein kinases.")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Wrapper for CADD pipeline targeting Aurora protein kinases.')
     parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
     parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
     parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
-    parser.add_argument('--aurora', type=str, required=True, help='Aurora kinase type (str, A, B)')
+    parser.add_argument('--aurora', type=str, required=False, default='B', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
     epoch = args.epoch
@@ -85,25 +84,25 @@ if __name__ == "__main__":
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
-    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf")
-    known_inhib_file = os.path.join(script_dir, f"data/aurora_kinase_{aurora}_interactions.csv")
-    results_dir = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
-    synth_csv = os.path.join(results_dir, f"synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
-    lipinski_csv = os.path.join(results_dir, f"lipinski_pass_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
-    tanimoto_inter_csv = os.path.join(results_dir, f"tanimoto_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
+    sdf_folder = os.path.join(parent_dir, f'trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf')
+    known_inhib_file = os.path.join(script_dir, f'data/aurora_kinase_{aurora}_interactions.csv')
+    results_dir = os.path.join(script_dir, f'results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}')
+    synth_csv = os.path.join(results_dir, f'synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
+    lipinski_csv = os.path.join(results_dir, f'lipinski_pass_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
+    tanimoto_inter_csv = os.path.join(results_dir, f'tanimoto_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
 
-    if aurora == "A":
+    if aurora == 'A':
         aur_type = '4cfg'
-    elif aurora == "B":
+    elif aurora == 'B':
         aur_type = '4af3'
     else:
-        raise ValueError("Aurora type must be 'A' or 'B'.")
+        raise ValueError('Aurora type must be "A" or "B".')
     
-    dest_dir = os.path.join(parent_dir, f"docking/{aur_type}/experiment_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/ligands")
+    dest_dir = os.path.join(parent_dir, f'docking/{aur_type}/experiment_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/ligands')
 
-    output_csv = os.path.join(results_dir, f"merged_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
-    top_100_output_csv = os.path.join(results_dir, f"top_100_tanimoto_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
-    top_50_output_csv = os.path.join(results_dir, f"top_50_sascore_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
+    output_csv = os.path.join(results_dir, f'merged_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
+    top_100_output_csv = os.path.join(results_dir, f'top_100_tanimoto_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
+    top_50_output_csv = os.path.join(results_dir, f'top_50_sascore_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
 
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     os.makedirs(os.path.dirname(top_100_output_csv), exist_ok=True)
@@ -124,7 +123,6 @@ if __name__ == "__main__":
         # Calculating scores for generated molecules
         mols, smiles, filenames, fps = load_mols_from_sdf_folder(sdf_folder)
 
-
     else:
         # Calculating scores for Aurora inhibitors
         mols, smiles, filenames, fps = read_aurora_kinase_interactions(known_inhib_file)
@@ -133,6 +131,7 @@ if __name__ == "__main__":
                         top_50_sa_score=top_50_sa_score,
                         dest_ligand_dir=dest_dir)
     
-    # print(f"Lipinski results saved to {output_csv}")
+    print(f'Top 100 Tanimoto results saved to {top_100_output_csv}')
+    print(f'Top 50 SA_Score results saved to {top_50_output_csv}')
 
 

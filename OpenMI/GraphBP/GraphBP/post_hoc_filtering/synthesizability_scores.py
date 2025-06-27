@@ -105,12 +105,12 @@ def calculate_scores(mols, smiles, filenames):
 
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Wrapper for CADD pipeline targeted to Aurora protein kinases.")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Wrapper for CADD pipeline targeting Aurora protein kinases.')
     parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
     parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
     parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
-    parser.add_argument('--aurora', type=str, required=True, help='Aurora kinase type (str, A, B)')
+    parser.add_argument('--aurora', type=str, required=False, default='B', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
     num_gen = args.num_gen
@@ -120,10 +120,10 @@ if __name__ == "__main__":
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
-    sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf")
-    known_inhib_file = os.path.join(script_dir, f"data/aurora_kinase_{aurora}_interactions.csv")
-    results_dir = os.path.join(script_dir, f"results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
-    output_csv = os.path.join(results_dir, f"synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
+    sdf_folder = os.path.join(parent_dir, f'trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf')
+    known_inhib_file = os.path.join(script_dir, f'data/aurora_kinase_{aurora}_interactions.csv')
+    results_dir = os.path.join(script_dir, f'results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}')
+    output_csv = os.path.join(results_dir, f'synthesizability_scores_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv')
     
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     
@@ -139,7 +139,7 @@ if __name__ == "__main__":
         synth = calculate_scores(mols, smiles, filenames)
         synth.to_csv(output_csv, index=False)
 
-    print(f"Synthesizability scores saved to {output_csv}")
+    print(f'Synthesizability scores saved to {output_csv}')
 
 
 # NOTE: The SA_Score ranges from 1 to 10 with 1 being easy to make and 10 being hard to make.
