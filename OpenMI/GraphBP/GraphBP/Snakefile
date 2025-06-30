@@ -1,0 +1,38 @@
+configfile: "config.yaml"
+
+rule all: 
+    input: 
+        expand(
+            "{trained_model_path}/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf",
+            trained_model_path=config["trained_model_path"],
+            epoch=config["epoch"],
+            num_gen=config["num_gen"],
+            known_binding_site=config["known_binding_site"],
+            aurora=config["aurora"]
+        )
+
+rule generate:
+    output:
+        "{trained_model_path}/epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}.mol_dict"
+    params:
+        num_gen = config["num_gen"],
+        epoch = config["epoch"],
+        known_binding_site = config["known_binding_site"],
+        aurora = config["aurora"]
+    shell:
+        "/vol/data/miniconda3/envs/graphbp_complete/bin/python main_gen.py --num_gen {params.num_gen} --epoch {params.epoch} "
+        "--known_binding_site {params.known_binding_site} --aurora {params.aurora}"
+
+rule evaluate:
+    input:
+        "{trained_model_path}/epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}.mol_dict"
+    output:
+        directory("{trained_model_path}/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}/sdf")
+    params:
+        num_gen = config["num_gen"],
+        epoch = config["epoch"],
+        known_binding_site = config["known_binding_site"],
+        aurora = config["aurora"]
+    shell:
+        "/vol/data/miniconda3/envs/graphbp_complete/bin/python main_eval.py --num_gen {params.num_gen} --epoch {params.epoch} "
+        "--known_binding_site {params.known_binding_site} --aurora {params.aurora}"

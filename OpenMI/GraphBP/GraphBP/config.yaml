@@ -1,0 +1,5 @@
+num_gen: 5
+epoch: 99
+known_binding_site: False
+aurora: B
+trained_model_path: trained_model_reduced_dataset_100_epochs

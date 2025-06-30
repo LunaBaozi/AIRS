@@ -11,3 +11,13 @@ previous local version on server.
 - How many atoms do the known inhibitors have??
 - Okay I'm too tired to check now, but the whole code needs to be fixed,
 we need to control the variables in a much better way, now it's a mess.
+
+
+conda create -c conda-forge -n pipeline2 rdkit python=3.10
+conda install -c conda-forge mamba
+conda install -c bioconda -c conda-forge snakemake
+conda install conda-forge::openbabel
+pip install biopython
+pip install matplotlib
+pip install scikit-learn
+python -m pip install torch-scatter --no-cache-dir --no-index --find-links https://pytorch-geometric.com/whl/torch-1.7.0+cu110.html
