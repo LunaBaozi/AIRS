@@ -2,4 +2,7 @@ num_gen: 5
 epoch: 99
 known_binding_site: False
 aurora: B
+pdbid: 4af3
 trained_model_path: trained_model_reduced_dataset_100_epochs
+python_env_path: /vol/data/miniconda3/envs/graphbp_complete/bin/python
+skip_generate: False

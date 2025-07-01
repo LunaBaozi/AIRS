@@ -45,7 +45,7 @@ def plot_len_smiles(df):
     ax.legend()
     plt.tight_layout()
     plt.show()
-    plt.savefig(os.path.join(results_dir, f'len_smiles_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'len_smiles_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     return
 
 def pie_chart_len_smiles(df):
@@ -67,7 +67,7 @@ def pie_chart_len_smiles(df):
             colors=plt.cm.Set2.colors)
     plt.title('SMILES Length Distribution')
     plt.axis('equal')
-    plt.savefig(os.path.join(results_dir, f'len_smiles_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'len_smiles_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     plt.show()
     return
 
@@ -126,7 +126,7 @@ def plot_sa_score(df):
                               bbox=dict(facecolor='black', alpha=0.6, boxstyle='round,pad=0.3'),
                               transform=inset_ax.transAxes)
     plt.show()
-    plt.savefig(os.path.join(results_dir, f'sa_score_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'sa_score_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     return
 
 # SCSCORE
@@ -185,7 +185,7 @@ def plot_sc_score(df):
                               bbox=dict(facecolor='black', alpha=0.6, boxstyle='round,pad=0.3'),
                               transform=inset_ax.transAxes)
     plt.show()
-    plt.savefig(os.path.join(results_dir, f'sc_score_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'sc_score_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     return
 
 
@@ -246,7 +246,7 @@ def plot_np_score(df):
                               bbox=dict(facecolor='black', alpha=0.6, boxstyle='round,pad=0.3'),
                               transform=inset_ax.transAxes)
     plt.show()
-    plt.savefig(os.path.join(results_dir, f'np_score_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'np_score_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     return
 
 
@@ -272,8 +272,8 @@ def plot_tSNE(fps):
     plt.title('t-SNE of Chemical Space (colored by SA_score)')
     plt.colorbar(label='SA_score')
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, f'tSNE_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
-    print(f'tSNE plot saved to {results_dir}')
+    plt.savefig(os.path.join(image_dir, f'tSNE_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    print(f'tSNE plot saved to {image_dir}')
     return
 
 
@@ -296,7 +296,7 @@ def plot_synthesizability_boxplot(df):
     ax.set_title('Boxplot of Normalized Synthesizability Scores')
     ax.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, f'boxplot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'boxplot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     plt.show()
     return
 
@@ -335,7 +335,7 @@ def plot_synthesizability_violinplot(df):
     ax.set_title('Violin Plot of Normalized Synthesizability Scores')
     ax.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, f'violin_plot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'violin_plot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     plt.show()
     return
 
@@ -416,7 +416,7 @@ def plot_synthesizability_hybridplot(df):
                 fontsize=10, color='k', alpha=alpha_bracket)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, f'hybrid_plot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'hybrid_plot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     plt.show()
     return
 
@@ -430,7 +430,7 @@ def plot_pairplot(df):
     g = sns.pairplot(data, diag_kind='kde', plot_kws={'alpha':0.6, 's':30})
     g.fig.suptitle('Pairplot of Synthesizability and SMILES Length', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, f'pairplot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'pairplot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     plt.show()
     return
 
@@ -449,7 +449,7 @@ def plot_lipinski_violations_piechart(df):
     )
     plt.title('Lipinski\'s Rule Violations per Molecule')
     plt.axis('equal')  # Equal aspect ratio ensures pie is drawn as a circle.
-    plt.savefig(os.path.join(results_dir, f'lipinski_violations_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'lipinski_violations_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     plt.show()
     return
 
@@ -482,7 +482,7 @@ def pie_chart_sa_score(df):
     )
     plt.title('Synthetic Accessibility (SA_score) Distribution')
     plt.axis('equal')
-    plt.savefig(os.path.join(results_dir, f'sa_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'sa_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     return
 
 def pie_chart_sc_score(df):
@@ -513,7 +513,7 @@ def pie_chart_sc_score(df):
     )
     plt.title('Synthetic Accessibility (SA_score) Distribution')
     plt.axis('equal')
-    plt.savefig(os.path.join(results_dir, f'sc_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'sc_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     return
 
 def pie_chart_np_score(df):
@@ -542,7 +542,7 @@ def pie_chart_np_score(df):
     )
     plt.title('Natural Product-likeness (NP_score) Distribution')
     plt.axis('equal')
-    plt.savefig(os.path.join(results_dir, f'np_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.savefig(os.path.join(image_dir, f'np_score_pie_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
     return
 
 
