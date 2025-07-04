@@ -27,14 +27,14 @@ def main():
     parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
     parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
     parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
-    parser.add_argument('--aurora', type=str, required=False, default='B', help='Aurora kinase type (str, A, B)')
+    parser.add_argument('--pdbid', type=str, required=False, default='4af3', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
     
     runner = Runner(conf)
 
     num_gen = args.num_gen 
     known_binding_site = args.known_binding_site
-    aurora = args.aurora.upper()
+    pdbid = args.pdbid.lower()
     print('Known binding site in main_gen:', known_binding_site)
 
     node_temp = 0.5
@@ -66,7 +66,7 @@ def main():
             known_binding_site=known_binding_site
         )
         
-        with open(f'{trained_model_path}/epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}.mol_dict','wb') as f:
+        with open(f'{trained_model_path}/epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_pdbid_{pdbid}.mol_dict','wb') as f:
             pickle.dump(all_mol_dicts, f)
 
 if __name__ == '__main__':

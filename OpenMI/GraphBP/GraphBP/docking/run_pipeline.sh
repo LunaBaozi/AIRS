@@ -12,7 +12,7 @@ echo "$(dirname "${BASH_SOURCE[0]}")/dock_with_vina.sh"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Script directory: $SCRIPT_DIR"
 
-BASE_DIR="$SCRIPT_DIR/$RECEPTOR_PREFIX/experiment_epoch_${EPOCH}_mols_${MOLS}_bs_${BS}_aurora_${AURORA}"
+BASE_DIR="$SCRIPT_DIR/$RECEPTOR_PREFIX/experiment_epoch_${EPOCH}_mols_${MOLS}_bs_${BS}_pdbid_${PDBID}"
 LIGAND_DIR="$BASE_DIR/ligands"
 PREPARED_LIG_DIR="$BASE_DIR/prepared_ligands"
 PREPARED_REC_DIR="$SCRIPT_DIR/$RECEPTOR_PREFIX"

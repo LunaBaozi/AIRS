@@ -12,16 +12,17 @@ CENTER=""
 SIZE="20 20 20"
 EXHAUST="32"
 
-MOLS="$1"  # Number of molecules
-EPOCH="$2"  # Epoch number
+EPOCH="$1"  # Epoch number
+MOLS="$2"  # Number of molecules
 BS="$3"    # Batch size
-AURORA="$4"  # Aurora version
+PDBID="$4"  # Aurora version
 
-if [[ "$AURORA" == "B" ]]; then
+
+if [[ "$PDBID" == "4af3" ]]; then
     RECEPTOR="$SCRIPT_DIR/4af3/4af3.pdb"
     RECEPTOR_PREFIX="4af3"
     CENTER="16 -18 2"
-elif [[ "$AURORA" == "A" ]]; then
+elif [[ "$PDBID" == "A" ]]; then
     RECEPTOR="$SCRIPT_DIR/4ceg/4ceg_1_protein.pdb"
     RECEPTOR_PREFIX="4ceg_receptor"
     CENTER="10 20 5"
@@ -30,7 +31,7 @@ elif [[ "$AURORA" == "A" ]]; then
 #     RECEPTOR_PREFIX="1iep"
 #     CENTER="15.190 53.903 16.917"
 else
-    echo "Error: --aurora argument must be A or B"
+    echo "Error: --pdbid argument must be A or B"
     exit 1
 fi
 

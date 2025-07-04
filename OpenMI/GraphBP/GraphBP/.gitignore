@@ -23,3 +23,4 @@ post_hoc_filtering/filtering.py
 post_hoc_filtering/brics_attempt.ipynb
 post_hoc_filtering/known_inhib_analysis.py
 .snakemake/
+.snakemake*

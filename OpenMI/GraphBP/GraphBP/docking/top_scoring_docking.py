@@ -186,31 +186,33 @@ if __name__ == "__main__":
     parser.add_argument('--num_gen', type=int, required=False, default=0, help='Desired number of generated molecules (int, positive)')
     parser.add_argument('--epoch', type=int, required=False, default=0, help='Epoch number the model will use to generate molecules (int, 0-99)')
     parser.add_argument('--known_binding_site', type=str, required=False, default='0', help='Allow model to use binding site information (True, False)')
-    parser.add_argument('--aurora', type=str, required=True, help='Aurora kinase type (str, A, B)')
+    parser.add_argument('--aurora', type=str, required=True, default='B', help='Aurora kinase type (str, A, B)')
+    parser.add_argument('--pdbid', type=str, required=True, default='4af3', help='Aurora kinase type (str, A, B)')
     args = parser.parse_args()
 
     epoch = args.epoch
     num_gen = args.num_gen
     known_binding_site = args.known_binding_site
     aurora = args.aurora
+    pdbid = args.pdbid.lower()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
     # sdf_folder = os.path.join(parent_dir, f"trained_model_reduced_dataset_100_epochs/gen_mols_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}/sdf")
     # known_inhib_file = os.path.join(script_dir, f"data/aurora_kinase_{aurora}_interactions.csv")
-    results_dir = os.path.join(parent_dir, f"post_hoc_filtering/results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
-    synth_csv = os.path.join(results_dir, f"top_50_sascore_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
+    results_dir = os.path.join(parent_dir, f"post_hoc_filtering/results_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_pdbid_{pdbid}")
+    synth_csv = os.path.join(results_dir, f"top_50_sascore_{epoch}_{num_gen}_{known_binding_site}_{pdbid}.csv")
     # lipinski_csv = os.path.join(results_dir, f"lipinski_pass_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
     # tanimoto_inter_csv = os.path.join(results_dir, f"tanimoto_inter_{epoch}_{num_gen}_{known_binding_site}_{aurora}.csv")
     
-    if aurora == "A":
-        aur_type = '4cfg'
-    elif aurora == "B":
-        aur_type = '4af3'
-    else:
-        raise ValueError("Aurora type must be 'A' or 'B'.")
+    # if aurora == "A":
+    #     aur_type = '4cfg'
+    # elif aurora == "B":
+    #     aur_type = '4af3'
+    # else:
+    #     raise ValueError("Aurora type must be 'A' or 'B'.")
    
-    experiment_dir = os.path.join(script_dir, f"{aur_type}/experiment_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_aurora_{aurora}")
+    experiment_dir = os.path.join(script_dir, f"{pdbid}/experiment_epoch_{epoch}_mols_{num_gen}_bs_{known_binding_site}_pdbid_{pdbid}")
     vina_csv = os.path.join(experiment_dir, f"vina_results.csv")
     vina_postprocess = os.path.join(experiment_dir, "vina_results_postprocessed.csv")
     output_plot_name = os.path.join(experiment_dir, "sa_vs_affinity_plot.png")
