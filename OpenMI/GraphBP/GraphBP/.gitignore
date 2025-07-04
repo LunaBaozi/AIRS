@@ -24,3 +24,7 @@ post_hoc_filtering/brics_attempt.ipynb
 post_hoc_filtering/known_inhib_analysis.py
 .snakemake/
 .snakemake*
+latest.txt
+notesfromthesis.txt
+questionsandnotes.txt
+sifting.txt

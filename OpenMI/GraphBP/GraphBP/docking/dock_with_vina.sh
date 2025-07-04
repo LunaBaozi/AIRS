@@ -9,7 +9,7 @@ echo "Script directory: $SCRIPT_DIR"
 RECEPTOR=""
 RECEPTOR_PREFIX=""
 CENTER=""
-SIZE="20 20 20"
+SIZE="30 30 30"
 EXHAUST="32"
 
 EPOCH="$1"  # Epoch number
@@ -21,7 +21,7 @@ PDBID="$4"  # Aurora version
 if [[ "$PDBID" == "4af3" ]]; then
     RECEPTOR="$SCRIPT_DIR/4af3/4af3.pdb"
     RECEPTOR_PREFIX="4af3"
-    CENTER="16 -18 2"
+    CENTER="21 -21 12"
 elif [[ "$PDBID" == "A" ]]; then
     RECEPTOR="$SCRIPT_DIR/4ceg/4ceg_1_protein.pdb"
     RECEPTOR_PREFIX="4ceg_receptor"

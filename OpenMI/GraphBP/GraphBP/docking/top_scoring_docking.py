@@ -39,8 +39,6 @@ def plot_sa_vs_affinity(sa_score_csv, vina_csv):
     sa_df['filename'] = sa_df['filename'].astype(str)
     vina_df['ligand'] = vina_df['ligand'].astype(str)
 
-
-
     merged = pd.merge(sa_df, vina_df, left_on='filename', right_on='ligand', suffixes=('_sa', '_vina'))
 
     if merged.empty:
