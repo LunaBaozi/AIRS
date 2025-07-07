@@ -64,7 +64,7 @@ def copy_top_50_ligands(filenames, smiles, mols, top_50_sa_score, dest_ligand_di
     mols_map = dict(zip(zip(filenames, smiles), mols))
     top_50_filenames = set(top_50_sa_score['filename'])
     mols_map = {(fname, smi): mol for (fname, smi), mol in mols_map.items() if fname in top_50_filenames}
-    print(mols_map)
+    # print(mols_map)
     for (fname, smi), mol in mols_map.items():
         if mol is not None:
             mol = Chem.AddHs(mol)
