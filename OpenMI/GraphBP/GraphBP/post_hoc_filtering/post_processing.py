@@ -5,6 +5,7 @@ from rdkit import Chem
 
 from scripts.aurk_int_preprocess import read_aurora_kinase_interactions
 from scripts.gen_mols_preprocess import load_mols_from_sdf_folder
+import shutil
 
 
 
@@ -46,25 +47,45 @@ def export_top_50_sa_score(input_df):
 
 
 
-def copy_top_50_ligands(mols, top_50_sa_score, dest_ligand_dir):
+def copy_top_50_ligands(filenames, smiles, mols, top_50_sa_score, dest_ligand_dir):
     """
     Copies ligand files for the top 50 molecules (by filename) from SDF source,
     or generates SDFs from SMILES if a CSV is provided.
+    Only generates SDF if it does not already exist, and ensures correct output filename.
     """
+
     os.makedirs(dest_ligand_dir, exist_ok=True)
 
-    mols_map = dict(zip(top_50_sa_score['filename'], mols))
-    for fname, mol in mols_map.items():
+    # Try to infer the source SDF directory from the filenames if possible
+    # If filenames are absolute paths, use them directly; otherwise, assume they are in the same folder
+    # as the original SDFs (if available)
+    # This logic may need to be adapted depending on your filename conventions
+
+    mols_map = dict(zip(zip(filenames, smiles), mols))
+    top_50_filenames = set(top_50_sa_score['filename'])
+    mols_map = {(fname, smi): mol for (fname, smi), mol in mols_map.items() if fname in top_50_filenames}
+    print(mols_map)
+    for (fname, smi), mol in mols_map.items():
         if mol is not None:
             mol = Chem.AddHs(mol)
             # Ensure .sdf extension
             if not fname.lower().endswith('.sdf'):
-                fname_out = fname + '.sdf'
+                fname_out = os.path.splitext(fname)[0] + '.sdf'
             else:
                 fname_out = fname
             sdf_path = os.path.join(dest_ligand_dir, fname_out)
-            with Chem.SDWriter(sdf_path) as writer:
-                writer.write(mol)
+            if not os.path.exists(sdf_path):
+                # Try to copy the original SDF file if it exists
+                if os.path.exists(fname):
+                    shutil.copy(fname, sdf_path)
+                else:
+                    # If the original file does not exist, generate SDF from mol
+                    # Use the exact filename from top_50_sa_score['filename']
+                    # sdf_path = os.path.join(dest_ligand_dir, sm)
+                    # smiles = Chem.MolToSmiles(mol)
+                    # print(fname, smiles)
+                    with Chem.SDWriter(sdf_path) as writer:
+                        writer.write(mol)
         else:
             print(f'Warning: Could not parse mol for {fname}')
 
@@ -129,7 +150,9 @@ if __name__ == '__main__':
         # Calculating scores for Aurora inhibitors
         mols, smiles, filenames, fps = read_aurora_kinase_interactions(known_inhib_file)
     
-    copy_top_50_ligands(mols,
+    copy_top_50_ligands(filenames,
+                        smiles,
+                        mols,
                         top_50_sa_score=top_50_sa_score,
                         dest_ligand_dir=dest_dir)
     
