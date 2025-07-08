@@ -1,6 +1,7 @@
 import os, argparse
 import pandas as pd
 import numpy as np
+import scikit_posthocs as sp
 
 from rdkit import Chem
 from rdkit.Chem import Draw
@@ -16,6 +17,115 @@ from collections import Counter
 from scripts.aurk_int_preprocess import read_aurora_kinase_interactions
 from scripts.gen_mols_preprocess import load_mols_from_sdf_folder
 from scipy.stats import mannwhitneyu
+
+from matplotlib.patches import Rectangle
+from matplotlib.gridspec import GridSpec
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
+from rdkit.Chem import Descriptors, rdMolDescriptors
+from rdkit.Chem.Draw import rdMolDraw2D
+import warnings
+warnings.filterwarnings('ignore')
+
+# Set style for better-looking plots
+plt.style.use('seaborn-v0_8')
+sns.set_palette("husl")
+
+
+# =====================================
+# 2. MOLECULAR PROPERTY DISTRIBUTIONS
+# =====================================
+def plot_molecular_properties(df):
+    """Plot distributions of molecular properties"""
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    
+    # properties = ['synthesizability', 'qed', 'tanimoto_similarity', 
+    #              'molecular_weight', 'logp', 'num_rotatable_bonds']
+    properties = ["SA_score", "SCScore", "NP_score", "QED", 
+                  "tanimoto", "len_smiles"]
+    
+    for i, prop in enumerate(properties):
+        row, col = i // 3, i % 3
+        ax = axes[row, col]
+        
+        if prop in df.columns:
+            # Histogram with KDE
+            ax.hist(df[prop], bins=30, alpha=0.7, density=True, color='skyblue', edgecolor='black')
+            
+            # Add KDE curve
+            from scipy import stats
+            x = np.linspace(df[prop].min(), df[prop].max(), 100)
+            kde = stats.gaussian_kde(df[prop])
+            ax.plot(x, kde(x), 'r-', linewidth=2, label='KDE')
+            
+            # Add vertical line for mean
+            mean_val = df[prop].mean()
+            ax.axvline(mean_val, color='red', linestyle='--', alpha=0.8, 
+                      label=f'Mean: {mean_val:.3f}')
+            
+            ax.set_title(f'{prop.replace("_", " ").title()} Distribution', fontsize=12, weight='bold')
+            ax.set_xlabel(prop.replace("_", " ").title())
+            ax.set_ylabel('Density')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(image_dir, f'molprop_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    return fig
+
+# =====================================
+# 3. PROPERTY CORRELATION HEATMAP
+# =====================================
+def create_correlation_heatmap(df):
+    """Create correlation heatmap of molecular properties"""
+    # Select numerical columns
+    numerical_cols = df.select_dtypes(include=[np.number]).columns
+    correlation_matrix = df[numerical_cols].corr()
+    
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Create heatmap
+    sns.heatmap(correlation_matrix, annot=True, cmap='RdYlBu_r', center=0,
+                square=True, fmt='.2f', cbar_kws={"shrink": .8})
+    
+    ax.set_title('Molecular Properties Correlation Matrix', fontsize=14, weight='bold', pad=20)
+    plt.tight_layout()
+    plt.savefig(os.path.join(image_dir, f'corrprop_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    return fig
+
+# =====================================
+# 4. FILTERING FUNNEL VISUALIZATION
+# =====================================
+def create_filtering_funnel(stages_data):
+    """Create a funnel chart showing compound filtering stages"""
+    fig = go.Figure()
+    
+    # Example stages - replace with your actual data
+    stages = list(stages_data.keys())
+    counts = list(stages_data.values())
+    
+    fig.add_trace(go.Funnel(
+        y=stages,
+        x=counts,
+        textinfo="value+percent initial",
+        textposition="inside",
+        opacity=0.8,
+        marker=dict(
+            color=["#3498db", "#e74c3c", "#f39c12", "#27ae60", "#9b59b6"],
+            line=dict(width=2, color="white")
+        )
+    ))
+    
+    fig.update_layout(
+        title="Compound Filtering Funnel",
+        title_x=0.5,
+        font=dict(size=12),
+        height=500,
+        width=700
+    )
+    
+    return fig
 
 
 # SMILES
@@ -282,9 +392,10 @@ def plot_synthesizability_boxplot(df):
     sa_norm = (df['SA_score'] - 1) / 9      # SA_score: 1-10
     sc_norm = (df['SCScore'] - 1) / 4       # SCScore: 1-5
     np_norm = (df['NP_score'] + 5) / 10     # NP_score: -5 to 5
+    qed_score = df['QED']
 
-    data = [sa_norm.dropna().values, sc_norm.dropna().values, np_norm.dropna().values]
-    scores = ['SA_score', 'SCScore', 'NP_score']
+    data = [sa_norm.dropna().values, sc_norm.dropna().values, np_norm.dropna().values, qed_score.dropna().values]
+    scores = ['SA_score', 'SCScore', 'NP_score', 'QED']
 
     fig, ax = plt.subplots(figsize=(8, 5))
     box = ax.boxplot(data, patch_artist=True, labels=scores, showmeans=True,
@@ -305,31 +416,32 @@ def plot_synthesizability_violinplot(df):
     sa_norm = (df['SA_score'] - 1) / 9      # SA_score: 1-10
     sc_norm = (df['SCScore'] - 1) / 4       # SCScore: 1-5
     np_norm = (df['NP_score'] + 5) / 10     # NP_score: -5 to 5
+    qed_score = df['QED']
 
-    data = [sa_norm.dropna().values, sc_norm.dropna().values, np_norm.dropna().values]
-    scores = ['SA_score', 'SCScore', 'NP_score']
+    data = [sa_norm.dropna().values, sc_norm.dropna().values, np_norm.dropna().values, qed_score.dropna().values]
+    scores = ['SA_score', 'SCScore', 'NP_score', 'QED']
 
     # Statistical significance: pairwise Mann-Whitney U test
     sig_labels = scores.copy()
-    alpha = 0.05 / 3  # Bonferroni correction for 3 comparisons
-    pairs = [(0,1), (0,2), (1,2)]
-    sig_matrix = [False, False, False]
+    alpha = 0.05 / 4  # Bonferroni correction for 3 comparisons
+    pairs = [(0,1), (0,2), (0, 3), (1,2), (1, 3), (2, 3)]
+    sig_matrix = [False, False, False, False]
     for idx, (i, j) in enumerate(pairs):
         stat, p = mannwhitneyu(data[i], data[j], alternative='two-sided')
         if p < alpha:
             sig_matrix[i] = True
             sig_matrix[j] = True
     # Add '***' if significant
-    for i in range(3):
+    for i in range(4):
         if sig_matrix[i]:
             sig_labels[i] += ' ***'
 
     fig, ax = plt.subplots(figsize=(8, 5))
     parts = ax.violinplot(data, showmeans=True, showmedians=True)
     for i, pc in enumerate(parts['bodies']):
-        pc.set_facecolor(['orange', 'blue', 'pink'][i])
+        pc.set_facecolor(['orange', 'blue', 'pink', 'green'][i])
         pc.set_alpha(0.5)
-    ax.set_xticks([1, 2, 3])
+    ax.set_xticks([1, 2, 3, 4])
     ax.set_xticklabels(sig_labels)
     ax.set_ylabel('Normalized Score Value (0-1)')
     ax.set_title('Violin Plot of Normalized Synthesizability Scores')
@@ -339,6 +451,15 @@ def plot_synthesizability_violinplot(df):
     plt.show()
     return
 
+def sig_plot_maybe(df):
+    mols_aur, smiles_aur, filenames_aur, fps_aur = read_aurora_kinase_interactions(known_inhib_file)
+    sns.set(rc={'figure.figsize':(8,6)},font_scale=1.5)
+    pc = sp.posthoc_mannwhitney(df, val_col="QED", group_col="SA_score", p_adjust='holm')
+    heatmap_args = {'linewidths': 0.25, 'linecolor': '0.5', 'clip_on': False, 'square': True, 'cbar_ax_bbox': [0.80, 0.35, 0.04, 0.3]}
+    _ = sp.sign_plot(pc, **heatmap_args)
+    plt.savefig(os.path.join(image_dir, f'sig_plot_{epoch}_{num_gen}_{known_binding_site}_{aurora}.png'))
+    plt.show()
+    return
 
 def plot_synthesizability_hybridplot(df):
     sa_norm = (df['SA_score'] - 1) / 9
@@ -591,6 +712,7 @@ if __name__ == '__main__':
     plot_tSNE(fps)
     plot_synthesizability_boxplot(synth_df)
     plot_synthesizability_violinplot(synth_df)
+    sig_plot_maybe(synth_df)
     plot_pairplot(synth_df)
     plot_lipinski_violations_piechart(lipinski_df)
     pie_chart_sa_score(synth_df)
@@ -598,5 +720,14 @@ if __name__ == '__main__':
     pie_chart_np_score(synth_df)
     pie_chart_len_smiles(synth_df)
     plot_synthesizability_hybridplot(synth_df)
+
+    print("Creating molecular property distributions...")
+    fig2 = plot_molecular_properties(synth_df)
+    fig2.savefig('molecular_properties.png', dpi=300, bbox_inches='tight')
+    
+    print("Creating correlation heatmap...")
+    fig3 = create_correlation_heatmap(synth_df)
+    fig3.savefig('correlation_heatmap.png', dpi=300, bbox_inches='tight')
+    
 
     print(f'Plots saved to {image_dir}')

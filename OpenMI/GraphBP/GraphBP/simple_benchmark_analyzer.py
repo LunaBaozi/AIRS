@@ -89,42 +89,43 @@ def analyze_benchmarks(benchmark_dir="benchmarks", experiment=None):
     total_runtime = sum(item['runtime_seconds'] for item in benchmark_data)
     total_memory = sum(item['max_rss_mb'] for item in benchmark_data)
     
-    # Generate report
-    print("\n" + "="*60)
-    print("SNAKEMAKE PIPELINE BENCHMARK ANALYSIS")
-    print("="*60)
-    print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"Rules analyzed: {len(benchmark_data)}")
-    print(f"Total runtime: {total_runtime:.2f}s ({total_runtime/60:.2f} min)")
-    print(f"Total memory: {total_memory:.2f} MB ({total_memory/1024:.2f} GB)")
+    # Prepare report lines
+    report_lines = []
+    report_lines.append("\n" + "="*60)
+    report_lines.append("SNAKEMAKE PIPELINE BENCHMARK ANALYSIS")
+    report_lines.append("="*60)
+    report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    report_lines.append(f"Rules analyzed: {len(benchmark_data)}")
+    report_lines.append(f"Total runtime: {total_runtime:.2f}s ({total_runtime/60:.2f} min)")
+    report_lines.append(f"Total memory: {total_memory:.2f} MB ({total_memory/1024:.2f} GB)")
     
-    print("\n" + "-"*60)
-    print("PERFORMANCE BY RULE:")
-    print("-"*60)
-    print(f"{'Rule Name':<25} {'Time (min)':<12} {'Memory (MB)':<12} {'% of Total':<10}")
-    print("-"*60)
+    report_lines.append("\n" + "-"*60)
+    report_lines.append("PERFORMANCE BY RULE:")
+    report_lines.append("-"*60)
+    report_lines.append(f"{'Rule Name':<25} {'Time (min)':<12} {'Memory (MB)':<12} {'% of Total':<10}")
+    report_lines.append("-"*60)
     
     for item in benchmark_data:
         percentage = (item['runtime_seconds'] / total_runtime) * 100
-        print(f"{item['rule_name']:<25} {item['runtime_minutes']:<12.2f} {item['max_rss_mb']:<12.2f} {percentage:<10.1f}%")
+        report_lines.append(f"{item['rule_name']:<25} {item['runtime_minutes']:<12.2f} {item['max_rss_mb']:<12.2f} {percentage:<10.1f}%")
     
     # Performance insights
     slowest_rule = benchmark_data[0]
     memory_hungry = max(benchmark_data, key=lambda x: x['max_rss_mb'])
     
-    print("\n" + "-"*60)
-    print("PERFORMANCE INSIGHTS:")
-    print("-"*60)
-    print(f"Slowest rule: {slowest_rule['rule_name']} ({slowest_rule['runtime_minutes']:.2f} min)")
-    print(f"Most memory-intensive: {memory_hungry['rule_name']} ({memory_hungry['max_rss_mb']:.2f} MB)")
+    report_lines.append("\n" + "-"*60)
+    report_lines.append("PERFORMANCE INSIGHTS:")
+    report_lines.append("-"*60)
+    report_lines.append(f"Slowest rule: {slowest_rule['rule_name']} ({slowest_rule['runtime_minutes']:.2f} min)")
+    report_lines.append(f"Most memory-intensive: {memory_hungry['rule_name']} ({memory_hungry['max_rss_mb']:.2f} MB)")
     
     # Find bottlenecks
     bottlenecks = [item for item in benchmark_data if item['runtime_seconds'] > total_runtime * 0.1]
     if bottlenecks:
-        print(f"Rules using >10% of total time: {len(bottlenecks)}")
+        report_lines.append(f"Rules using >10% of total time: {len(bottlenecks)}")
         for bottleneck in bottlenecks:
             percentage = (bottleneck['runtime_seconds'] / total_runtime) * 100
-            print(f"   - {bottleneck['rule_name']}: {percentage:.1f}%")
+            report_lines.append(f"   - {bottleneck['rule_name']}: {percentage:.1f}%")
     
     # CPU efficiency analysis
     cpu_efficient_rules = []
@@ -136,32 +137,42 @@ def analyze_benchmarks(benchmark_dir="benchmarks", experiment=None):
                 cpu_efficient_rules.append(item)
     
     if cpu_efficient_rules:
-        print(f"Rules with low CPU utilization (<50%):")
+        report_lines.append(f"Rules with low CPU utilization (<50%):")
         for rule in cpu_efficient_rules:
-            print(f"   - {rule['rule_name']}: {rule['cpu_efficiency']:.1f}%")
+            report_lines.append(f"   - {rule['rule_name']}: {rule['cpu_efficiency']:.1f}%")
     
-    print("\n" + "-"*60)
-    print("OPTIMIZATION RECOMMENDATIONS:")
-    print("-"*60)
+    report_lines.append("\n" + "-"*60)
+    report_lines.append("OPTIMIZATION RECOMMENDATIONS:")
+    report_lines.append("-"*60)
     
     if slowest_rule['runtime_minutes'] > 5:
-        print(f"• Focus optimization efforts on '{slowest_rule['rule_name']}' (biggest time sink)")
+        report_lines.append(f"• Focus optimization efforts on '{slowest_rule['rule_name']}' (biggest time sink)")
     
     if memory_hungry['max_rss_mb'] > 2000:  # > 2GB
-        print(f"• Monitor memory usage for '{memory_hungry['rule_name']}' ({memory_hungry['max_rss_mb']:.0f} MB)")
+        report_lines.append(f"• Monitor memory usage for '{memory_hungry['rule_name']}' ({memory_hungry['max_rss_mb']:.0f} MB)")
     
     if len(bottlenecks) > 1:
-        print(f"• Consider parallelizing or optimizing the {len(bottlenecks)} slowest rules")
+        report_lines.append(f"• Consider parallelizing or optimizing the {len(bottlenecks)} slowest rules")
     
     if cpu_efficient_rules:
-        print(f"• Investigate I/O bottlenecks in rules with low CPU utilization")
+        report_lines.append(f"• Investigate I/O bottlenecks in rules with low CPU utilization")
     
-    # Save CSV summary
+    # Print report to screen
+    for line in report_lines:
+        print(line)
+    
+    # Save report to file
     output_dir = Path("benchmark_results")
     if experiment:
         output_dir = output_dir / f"experiment_{experiment}"
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    report_file = output_dir / "benchmark_report.txt"
+    with open(report_file, 'w') as f:
+        for line in report_lines:
+            f.write(line + '\n')
+    
+    # Save CSV summary
     csv_file = output_dir / "benchmark_summary.csv"
     with open(csv_file, 'w', newline='') as f:
         if benchmark_data:
@@ -170,6 +181,7 @@ def analyze_benchmarks(benchmark_dir="benchmarks", experiment=None):
             writer.writerows(benchmark_data)
     
     print(f"\nDetailed data saved to: {csv_file}")
+    print(f"Report saved to: {report_file}")
     print("="*60)
 
 def analyze_stats_file(stats_file="benchmarks/execution_stats.json"):
@@ -227,7 +239,7 @@ if __name__ == "__main__":
                 config = yaml.safe_load(f)
                 experiment = config.get("experiment")
                 if experiment:
-                    print(f"🔍 Auto-detected experiment {experiment} from config.yaml")
+                    print(f"Auto-detected experiment {experiment} from config.yaml")
         except:
             pass
     
@@ -235,3 +247,4 @@ if __name__ == "__main__":
     analyze_benchmarks(benchmark_dir, experiment)
     analyze_stats_file()
     print("\nAnalysis complete!")
+

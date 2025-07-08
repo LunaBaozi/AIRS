@@ -5,6 +5,7 @@ import pandas as pd
 sys.path.append(os.path.join(os.environ['CONDA_PREFIX'],'share','RDKit','Contrib'))
 
 from rdkit import Chem
+from rdkit.Chem.QED import qed
 from SA_Score import sascorer 
 from NP_Score import npscorer
 # from syba.syba import SybaClassifier
@@ -36,7 +37,6 @@ def sdf_to_mol(sdf_path, mol_path):
             Chem.MolToMolFile(mol, mol_path)
             break  # Only write the first molecule
 
-
 def calculate_sa_score(mol):
     """
     Calculates the Synthetic Accessibility Score (SA_Score) for a given molecule.
@@ -57,7 +57,6 @@ def calculate_sc_score(smi):
     """
     return scscorer.get_score_from_smi(smi)
 
-
 def calculate_np_score(mol):
     """
     Calculates the Natural Product-likeness (NP_score) score for a given molecule.
@@ -71,6 +70,15 @@ def calculate_np_score(mol):
     confidence = npscorer.scoreMolWConfidence(mol, fscore)
     return score, confidence
 
+def calculate_qed(mol):
+    """
+    Calculates the Quantitative Estimate of Drug-likeness (QED) score for a given molecule.
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): The RDKit molecule object.
+    Returns:
+        tuple: A tuple containing the QED score.
+    """
+    return qed(mol)
 
 # def calculate_syba_score(smi):
 #     """
@@ -82,15 +90,15 @@ def calculate_np_score(mol):
 #     """
 #     return syba.predict(smi)
 
-
 def calculate_scores(mols, smiles, filenames):
     results = []
     for mol, smi, fn in zip(mols, smiles, filenames):
         if mol is None:
             raise Exception('Not a valid mol')
         sa_score = calculate_sa_score(mol)
-        np_score, _ = calculate_np_score(mol)
         (smi, sc_score) = calculate_sc_score(smi)
+        np_score, _ = calculate_np_score(mol)
+        qed_score = calculate_qed(mol)
         # syba_score = calculate_syba_score(smi)
         results.append({
             'filename': fn,
@@ -99,6 +107,7 @@ def calculate_scores(mols, smiles, filenames):
             'SA_score': sa_score,
             'SCScore': sc_score,
             'NP_score': np_score,
+            'QED': qed_score,
             # 'Syba_score': syba_score
         })
     return pd.DataFrame(results)
