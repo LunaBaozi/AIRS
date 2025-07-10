@@ -1,6 +1,7 @@
 # Based on the code from: https://github.com/klicperajo/dimenet,
 # https://github.com/rusty1s/pytorch_geometric/blob/master/torch_geometric/nn/models/dimenet_utils.py
 
+import math
 import numpy as np
 from scipy.optimize import brentq
 from scipy import special as sp
@@ -72,8 +73,8 @@ def bessel_basis(n, k):
 
 
 def sph_harm_prefactor(k, m):
-    return ((2 * k + 1) * np.math.factorial(k - abs(m)) /
-            (4 * np.pi * np.math.factorial(k + abs(m))))**0.5
+    return ((2 * k + 1) * math.factorial(k - abs(m)) /
+            (4 * np.pi * math.factorial(k + abs(m))))**0.5
 
 
 def associated_legendre_polynomials(k, zero_m_only=True):
