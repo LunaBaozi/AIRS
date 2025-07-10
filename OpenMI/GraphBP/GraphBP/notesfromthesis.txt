@@ -1,0 +1,298 @@
+
+lanciare "screen -r" da terminale per non perdere il processo
+ctrl+a+d
+
+
+INSTALL CONDA
+then --> source ~/miniconda3/bin/activate
+conda list
+conda create -n molgen python=3.8
+conda activate molgen
+
+pip install rdkit-pypi==2021.9.3
+pip install biopython==1.79
+
+python -c "import torch; print(torch.version.cuda)"
+pip install torch==1.9.1+cu102 -f https://download.pytorch.org/whl/torch_stable.html
+pip install scipy==1.7.3
+pip install --no-index torch_scatter torch_sparse torch_cluster -f https://data.pyg.org/whl/torch-1.9.0+cu102.html
+pip install torch-geometric
+pip install biopython==1.79
+conda install -c conda-forge openbabel
+pip install pandas==1.3.5
+pip install networkx==2.6.3
+pip install sympy==1.9
+
+
+python -m torch.utils.collect_env
+
+
+mkdir molgeneration
+
+
+ clone https://github.com/LunaBaozi/GraphBP.git
+
+mkdir datav11
+
+wget https://bits.csb.pitt.edu/files/crossdock2020/v1.1/CrossDocked2020_v1.1.tgz -P datav11/crossdock2020/
+
+tar -C datav11/crossdock2020/ -xzf daatv11/crossdock2020/CrossDocked2020_v1.1.tgz
+
+python scripts/split_sdf.py datav11/crossdock2020/it2_tt_0_lowrmsd_mols_train0_fixed_NOAURORA.types datav11/crossdock2020
+	---> if INVARIANT VIOLATION error, force reinstall rdkit version rdkit-pypi==2021.9.3
+
+python scripts/split_sdf.py datav11/crossdock2020/it2_tt_0_lowrmsd_mols_test0_fixed.types datav11/crossdock2020
+
+
+
+
+
+#################################################################################################
+HOW TO OBTAIN CORRECT FILES FOR WORKING WITH AURORA
+#################################################################################################
+wget https://raw.githubusercontent.com/divelab/GraphBP/main/GraphBP/data/crossdock2020/it2_tt_0_lowrmsd_mols_train0_fixed.types
+
+grep -v "AURK" it2_tt_0_lowrmsd_mols_train0_fixed.types > tmpfile && mv tmpfile it2_tt_0_lowrmsd_mols_train0_fixed_NOAURORA.types 
+
+wget https://bits.csb.pitt.edu/files/it2_tt_0_lowrmsd_mols_test0_fixed.types
+
+grep "AURK" it2_tt_0_lowrmsd_mols_train0_fixed.types >> it2_tt_0_lowrmsd_mols_test0_fixed.types 
+
+tail it2_tt_0_lowrmsd_mols_test0_fixed.types 
+
+
+--> GOTTA KEEP DELETING LINES THAT ARE NOT PRESENT IN THE TRAIN FILE
+   ---> NOT REALLY, WE ARE DOWNLOADING THE V1.1 VERSION (we were previously using the v1.3)
+
+
+#################################################################################################
+WE SHOULD GENERATE LIGANDS FOR DIFFERENT FORMS OF AURORA!! (HOLO, APO, CLOSE1MG, OPEN2MG, ETC)
+#################################################################################################
+tocca scaricarsi Vina
+looks like che i .sdf files che outputta equibind hanno già informazioni spaziali per cui siamo in grado di caricarli in Chimera nella posizione corretta assegnata da Equibind (generalmente il ATP binding site). Possiamo sicuramente fare generazione per diversi tipi di Aurora (come precedentemente scritto) e poi anche volendo finetunare la correzione con autodock vina (che bisogna scaricare)
+BUT HOW CAN A SDF FILE CONTAIN THE RELATIVE POSITION OF A LIGAND WRT ITS RECEPTOR???
+
+CHECK EQUIBIND REPO FOR ISSUES --> there are a lot of interesting ones
+
+WE SHOULD ALSO RUN MORE ANALYSES ON THESE LIGANDS --> like for example properties analyses
+
+Maybe we should also add some lines about generative models?
+
+
+
+
+
+#################################################################################################
+DETAILED PIPELINE STEP BY STEP
+#################################################################################################
+Go to server
+Activate conda with source ~/miniconda/bin/activate
+Activate myenv with conda activate myenv
+Navigate to correct folder with cd /data/trainGBP/GraphBP/GraphBP/
+Open VScode
+Check files for correct paths and check selected test target file for which aurora to choose
+Run CUDA_VISIBLE_DEVICES=0 python main_gen.py
+Run CUDA_VISIBLE_DEVICES=0 python main_eval.py
+New molecules are saved in trained_model/gen_mols_epoch_33
+Enter the analyses folder 
+Create EquiBind dataset (NOT trying with multiligand support now)
+Calculate Tanimoto similarity with canonical SMILES (Morgan fingerprints)
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (06.03.23)
+#################################################################################################
+We generated 200 molecules for each Aurora A and Aurora B (ASSUMING KNOWN BINDING SITE), specifically 200 for Aurora A (PDB 4ztq in complex with ligand 4uzh-jve) and 200 for Aurora B (PDB 4af3 in complex with ligand 4af3-vx6).
+Be careful, the saved molecules are saved all in one single folder, so we need to divide them according to the receptor they were generated for. BE CAREFUL, some generated molecules might not have passed the evaluation tests, so get eliminated from the generated set (this will be needed when we will divide in half, for example, the generated set of molecules to obtain those for Aurora A and those for Aurora B).
+Now what? We should calculate the Tanimoto similarity with both Morgan fingerprints and Cinfony fingerprints
+Occhio: le immagini delle molecole create con GraphBP sono sul mio pc in "/home/luna/Documents/Coding/GraphBP/GraphBP/trained_model", mentre i risultati e il dataset per EquiBind sono in "/home/luna/Documents/Coding/GraphBP/GraphBP/analyses/results"
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (07.03.23)
+#################################################################################################
+Running EquiBind on the generated molecules
+Per scaricare file singoli da github: wget https://raw.githubusercontent.com/LunaBaozi/Thesis-datasets/main/AURdata/AURdata.zip  (wget https://raw.githubusercontent.com/username/repository/branch/path/filename.md)
+Il github doesnt recognize changes, check the .gitignore file (there was the data directory for EquiBind, so any change in data was not recognized and syncronized)
+Possiamo plottare la distribuzione dei Tanimoto coefficients!!!! FATTO
+DELETED FILE 131 from aurkb_nobs because it contained Nan
+Possiamo calcolare la significance della differenza delle medie delle due distribuzioni
+
+Ok i ligandi che abbiamo generato per Aurora A fanno vomitare (o meglio, la top 5 di similarity fa schifo, non è neanche vicina al recettore, non so perché). Però provando a fare docking con AutoDock Vina si dockano benino al binding site del recettore, quindi nice
+
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (09.03.23)
+#################################################################################################
+Gotta check the number of atoms that GraphBP generates. We have huge molecules (when analyzing them with Chimera according to top 5 scoring Tanimoto similarity molecules)
+We also need to start plotting the """XAI""" results by plotting the residue contact with Chimera
+
+THIS IS THE FIRST AURKA THAT WE USED --> 1 5.008774 1.06206 AURKA_HUMAN_122_397_0/4ztq_A_rec.pdb AURKA_HUMAN_122_397_0/4ztq_A_rec_4uzh_jve_lig_tt_min_0.sdf.gz #-6.86773
+gives wrong results because after checking on PDB we foung that this is only the structure of the catalytic site of AURKA
+
+Generate, post-process, create EB dataset --> run EquiBind
+OCCHIO!! hai sbagliato nome di aurora nel nuovo dataset con 4byi, va corretto (solo il nome, il dataset è giusto)
+Possiamo prendere i top 5 tanimoto e altri random 5
+
+NEED TO WRITE:
+-creation of conda environments
+-modification of train test and selected test files
+-modification of number of mols generated
+-modification of number of atoms generated?
+-generation procedure
+-evaluation procedure
+-postprocessing and analyses
+-tanimoto coefficient calculation
+-statistical analyses
+-creation of EB dataset
+-modification of EB code
+
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (10.03.23)
+#################################################################################################
+CHECK IF EQUIBIND ALREADY KNOWN THE BINDING POCKET, this might explain why we obtain shit results for aurora A
+Plot graphbp ligands and eb ligands side by side on chimera
+Few-shot learning network: run 1 epoch and see what it does (non ho ben capito cosa dovrebbe essere l'output)
+Non ci sono riuscita, vediamo se lo fixo ma non oggi
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (11.03.23)
+#################################################################################################
+Today we use Chimera!
+con chimerax produci:
+- immagine ligando 3d (da mettere a comparison con png di graphbp e pgn di equibind)
+- immagine ligando+aurora (ligando stick con colori element, aurora ribbon con colore solid)
+- immagine ligando+aurora CONTACT
+- immagine ligando+aurora CLASH
+- immagine ligando+aurora HBOND
+- immagine ligando+aurora (ligando stick color elements, aurora surface)
+
+
+- contacts protein restrict ligand reveal true select true color #ffff00 dashes 8 radius 0.055
+- Actions > Label > Code + number
+- contacts delete
+- clashes protein restrict ligand reveal true
+- save ~/Downloads/image.png supersample 3
+- color :vx6 & C salmon
+
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (12.03.23)
+#################################################################################################
+CAN ALSO PLOT HYDROPHOBICITY (POCKET SHOULD BE HYDROPHOBIC)
+specifica che la ratio per generare ligandi fuori dal binding site era per cercare nuovi siti allosterici
+
+
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (13.03.23)
+#################################################################################################
+metti istruzioni su come runnare il codice in un'appendice quella dei metodi
+graph generation and node generation DESCRIVI
+descrivi anche che generi per il binding site e not per il binding site
+FAI SCRIPT PER PRENDERE I PNG DI GRAPHBP E GENERARE QUELLI DI EQUIBIND, poi scegline un po' a caso e mettili nel testo
+
+
+#################################################################################################
+THE EXPERIMENT WE ARE DOING TODAY (14.03.23)
+#################################################################################################
+metti istruzioni su come runnare il codice in un'appendice quella dei metodi
+graph generation and node generation DESCRIVI
+descrivi anche che generi per il binding site e not per il binding site
+FAI SCRIPT PER PRENDERE I PNG DI GRAPHBP E GENERARE QUELLI DI EQUIBIND, poi scegline un po' a caso e mettili nel testo
++
+visualizzazione receptor + ligand equidock da mettere in appendice FATTO
+SISTEMA GENERAZIONE DI AURORA A --> URGENTE!!!
+ma equibind mi corregge tutti i ligandi e me li fa diventare flat?
+THE BEST WOULD BE TO PLOT THE AUTODOCK CORRECTED LIGANDS ONTO AURORA WITH FEATURES HIGHLIGHTED
+fai tabella con parametri dei modelli
+prova a reinstallare anaconda nel server
+
+
+
+
+
+
+
+
+%\begin{figure}[h]
+%	\centering
+%	\begin{tabular}{cccc}
+%		\includegraphics[width=0.2\textwidth]{images/alisertib.png} &
+%		\includegraphics[width=0.2\textwidth]{images/amg900.png} &   
+%		\includegraphics[width=0.2\textwidth]{images/at9283.png} &
+%		\includegraphics[width=0.2\textwidth]{images/aurkinhib2.png} \\
+%		(i) \textcolor{orange}{Alisertib} & (ii) AMG-900 & (iii) AT-9283 & (iv) Aurora k. inhib. II \\[6pt]
+%		\includegraphics[width=0.2\textwidth]{images/aurkinhib3.png} &
+%		\includegraphics[width=0.2\textwidth]{images/barasertib.png} &
+%		\includegraphics[width=0.2\textwidth]{images/barasertibHpqa.png} &   
+%		\includegraphics[width=0.2\textwidth]{images/cdkinhib4.png} \\
+%		(v) \textcolor{orange}{Aurora k. inhib. III} & (vi) Barasertib & (vii) \textcolor{cyan}{Barasertib-hQPA} & (viii) Cdk inhibitor IV \\[6pt]
+%		\includegraphics[width=0.2\textwidth]{images/cenisertib.png} &
+%		\includegraphics[width=0.2\textwidth]{images/compound1.png} &
+%		\includegraphics[width=0.2\textwidth]{images/compound10.png} & 
+%		\includegraphics[width=0.2\textwidth]{images/compound16.png} \\
+%		(ix) \textcolor{cyan}{Cenisertib} & (x) \textcolor{cyan}{Compound 1} & (xi) Compound 10 & (xii) \textcolor{orange}{Compound 16} \\[6pt]
+%		\includegraphics[width=0.2\textwidth]{images/compound25.png} &   
+%		\includegraphics[width=0.2\textwidth]{images/compound38.png} &
+%		\includegraphics[width=0.2\textwidth]{images/compound46.png} &
+%		\includegraphics[width=0.2\textwidth]{images/danusertib.png} \\
+%		(xiii) Compound 25 & (xiv) Compound 38 & (xv) Compound 46 & (xvi) Danusertib \\[6pt]
+%		\includegraphics[width=0.2\textwidth]{images/dubermatinib.png} & 
+%		\includegraphics[width=0.2\textwidth]{images/ENMD2076.png} &
+%		\includegraphics[width=0.2\textwidth]{images/GSK3inhib13.png} &
+%		\includegraphics[width=0.2\textwidth]{images/gsk143.png} \\
+%		(xvii) Dubermatinib & (xviii) \textcolor{orange}{ENMD-2076} & (xix) \textcolor{orange}{GSK-3 inhibitor XIII} & (xx) \textcolor{orange}{GSK-143}
+%	\end{tabular}
+%	\caption{Known Aurora inhibitors (1 of 3).}
+%	\label{fig:inhib1}
+%\end{figure}
+
+
+%\begin{figure}[h]
+%	\centering
+%	\begin{tabular}{cccc}
+%
+%		\includegraphics[width=0.2\textwidth]{images/mk5108.png} &
+%		\includegraphics[width=0.2\textwidth]{images/mln8054.png} &
+%		\includegraphics[width=0.2\textwidth]{images/nikinhib12f.png} &
+%		\includegraphics[width=0.2\textwidth]{images/PF562271.png} \\
+%		(xxix) MK-5108 & (xxx) MLN-8054 & (xxxi) \textcolor{cyan}{NIK inhibitor 12f} & (xxxii) \textcolor{orange}{PF-562271} \\[6pt]
+%		\includegraphics[width=0.2\textwidth]{images/RG1530.png} &
+%		\includegraphics[width=0.2\textwidth]{images/rhokinhib4.png} &
+%		\includegraphics[width=0.2\textwidth]{images/sns314.png} &   
+%		\includegraphics[width=0.2\textwidth]{images/su6656.png} \\
+%		(xxxiii) \textcolor{orange}{RG-1530} & (xxxiv) \textcolor{orange}{Rho k. inhibitor IV} & (xxxv) SNS-314 & (xxxvi) \textcolor{cyan}{SU-6656} \\[6pt]
+%		\includegraphics[width=0.2\textwidth]{images/tak632.png} &
+%		\includegraphics[width=0.2\textwidth]{images/tinengotinib.png} &
+%		\includegraphics[width=0.2\textwidth]{images/tozasertib.png} &   
+%		\includegraphics[width=0.2\textwidth]{images/vic1911.png} \\
+%		(xxxviii) \textcolor{cyan}{TAK-632} & (xxxviii) Tinengotinib & (xxxix) Tozasertib & (xl) VIC-1911
+%	\end{tabular}
+%	\caption{Known Aurora inhibitors (2 of 3).}
+%	\label{fig:inhib2}
+%\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{tabular}{ccc}
+		\includegraphics[width=0.2\textwidth]{images/VTX11e.png} &
+		\includegraphics[width=0.2\textwidth]{images/xmd12.png} &
+		\includegraphics[width=0.2\textwidth]{images/zm447439.png} \\
+		(xli) \textcolor{orange}{VTX-11e} & (xlii) XMD-12 & (xliii) ZM-447439
+	\end{tabular}
+	\caption{Known Aurora inhibitors (3 of 3).}
+	\label{fig:inhib3}
+\end{figure}
+
+

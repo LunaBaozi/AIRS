@@ -1,0 +1,36 @@
+name: postprocessing_clean
+channels:
+  - conda-forge
+  - bioconda
+  - pytorch
+dependencies:
+  - python=3.8
+  # Core scientific computing
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - networkx
+  
+  # Molecular modeling
+  - rdkit
+  - openbabel
+  
+  # PyTorch ecosystem
+  - pytorch
+  - torchvision
+  - torchaudio
+  
+  # Additional packages for post-processing
+  - biopython
+  - seaborn
+  - plotly
+  - ipython
+  - jupyter
+  
+  # Pip dependencies for specialized packages
+  - pip
+  - pip:
+    - torch-geometric
+    - syba  # Synthetic accessibility
+    - mordredcommunity  # Molecular descriptors

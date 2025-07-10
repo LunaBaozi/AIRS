@@ -1,0 +1,38 @@
+name: graphbp_complete
+channels:
+  - conda-forge
+  - bioconda
+  - pytorch
+  - nvidia
+dependencies:
+  - python=3.10
+  - mamba
+  # Core scientific computing
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - networkx
+  
+  # Molecular modeling (must be conda)
+  - rdkit
+  - openbabel
+  
+  # Workflow management
+  - snakemake
+  
+  # PyTorch (adjust cuda version as needed)
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.8  # Remove this line if you don't have CUDA
+  
+  # Pip dependencies
+  - pip
+  - pip:
+    - biopython
+    - torch-geometric
+    - torch-scatter
+    - torch-sparse
+    - torch-spline-conv

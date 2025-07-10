@@ -1,0 +1,30 @@
+name: graphbp_snakemake
+channels:
+  - conda-forge
+  - bioconda
+  - pytorch
+dependencies:
+  - python=3.10
+  # Core scientific computing
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - networkx
+  
+  # Molecular modeling (must be conda)
+  - rdkit
+  - openbabel
+  
+  # PyTorch ecosystem
+  - pytorch
+  - torchvision
+  - torchaudio
+  
+  # Bioinformatics
+  - biopython
+  
+  # Install PyTorch Geometric via pip to avoid channel issues
+  - pip
+  - pip:
+    - torch-geometric

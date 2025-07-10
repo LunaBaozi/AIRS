@@ -1,0 +1,6 @@
+"","knowninhib_name","knowninhib_smiles","genmol_name","genmol_smiles","simil","cinfony.simil"
+"2871","MK-5108","O=C(O)C1(Cc2cccc(Nc3nccs3)n2)CCC(Oc2cccc(Cl)c2F)CC1","4af3_132_ligand.sdf","NCCNC1C(Cc2ccccc2CCO)C1CC1(CC(=O)OC2C3C4CC423)CC1",0.127,0.27536231884058
+"639","cenisertib","Cc1cc(Nc2ncc(F)c(N[C@H]3[C@@H](C(N)=O)[C@@H]4C=C[C@H]3C4)n2)ccc1N1CCN(C)CC1","4af3_144_ligand.sdf","CCC(CC)C1NCCC2C/C(=C\C34C5C36C1(C)C546)CC(C)CN2C",0.07,0.270967741935484
+"129","cenisertib","Cc1cc(Nc2ncc(F)c(N[C@H]3[C@@H](C(N)=O)[C@@H]4C=C[C@H]3C4)n2)ccc1N1CCN(C)CC1","4af3_64_ligand.sdf","C=CCC1C=C2CC34CC5C(CC6OC6C(CC)CC)CCCC5C5CC6C(N63)C3(C(CC3(C)C)C3CC26C1(C)C36C)N4C5",0.088,0.262032085561497
+"163","cenisertib","Cc1cc(Nc2ncc(F)c(N[C@H]3[C@@H](C(N)=O)[C@@H]4C=C[C@H]3C4)n2)ccc1N1CCN(C)CC1","4af3_41_ligand.sdf","CCCC1CC2(C/C=C\C3NC4NC(C5CC6C(CCC)C6C5)C56C2(C)C52C35N4C562)CC23CCC4CC(CCC1C2CC3)C4",0.043,0.26063829787234
+"5501","cenisertib","Cc1cc(Nc2ncc(F)c(N[C@H]3[C@@H](C(N)=O)[C@@H]4C=C[C@H]3C4)n2)ccc1N1CCN(C)CC1","4af3_121_ligand.sdf","C[C@@H]1[C@@H]([C@@H]2[C@@]3(C=CC4CC4)[C@@H]4NC[C@@]423)[C@@]1(C)NC1CC1",0.038,0.258064516129032

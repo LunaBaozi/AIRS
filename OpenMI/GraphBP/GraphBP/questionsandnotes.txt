@@ -1,0 +1,10 @@
+NOTES ON METHOD
+
+1. Train and test sets are completely NOT overlapped
+2. selected_test_targets.types contains some chosen lines from it2_tt_0_lowrmsd_mols_test0_fixed.types
+3. Is it computationally correct to use some chosen lines from it2_tt_0_lowrmsd_mols_train0_fixed.types and 
+   create with them a new selected_test_targets_AURK.types??
+   Or do we have to re-train the model without the AURK types in the training set and 
+   insert them in the test set, so then we can use them for inference?
+4. Remember your focus: you need to generate INHIBITORS for aurora kinase. So far we have only 
+   generated ligands, not specifically ligands that inhibit the action of the kinase.
