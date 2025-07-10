@@ -1,8 +1,12 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch_geometric.nn.acts import swish
+import torch.nn.functional as F
 from torch_geometric.nn.inits import glorot_orthogonal
+
+# Use F.silu instead of the deprecated torch_geometric.nn.acts.swish
+# swish and silu are the same activation function
+swish = F.silu
 
 class ST_Net_Exp(nn.Module):
     def __init__(self, input_dim, output_dim, hid_dim=64, num_layers=2, bias=True):
