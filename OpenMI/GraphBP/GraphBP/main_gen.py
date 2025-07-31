@@ -44,8 +44,8 @@ def main():
 
     # Min and max atoms calculated on the basis of known Aurora kinase inhibitors
     # The numbers exclude H atoms
-    min_atoms = 25 # 20 (generic small molecules)
-    max_atoms = 42 # 100 (generic small molecules)
+    min_atoms = 25 #25 # 20 (generic small molecules)
+    max_atoms = 50 #42 # 100 (generic small molecules)
     focus_th = 0.5
     contact_th = 0.5
 
